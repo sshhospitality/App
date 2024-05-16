@@ -86,7 +86,7 @@ class _LoginState extends State<Login> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         if (emailController.text == "sai@gmail.com" &&
-                            passwordController.text == "qazxswedcvfr") {
+                            passwordController.text == "123") {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
