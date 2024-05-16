@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +31,7 @@ class OnboardingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/splash.jpg'),
+            Image.asset('assets/splash.jpg'), // Ensure this path is correct and the image exists
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -115,10 +116,10 @@ class _LoginState extends State<Login> {
                       if (_formKey.currentState!.validate()) {
                         if (emailController.text == "sai@gmail.com" &&
                             passwordController.text == "123") {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HomePage(email: emailController.text)
+                              builder: (context) => const MainHomePage()
                             ),
                           );
                         } else {
@@ -139,34 +140,6 @@ class _LoginState extends State<Login> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key, required this.email});
-
-  final String email;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),
-      ),
-      body: Column(
-        children: [
-          Text(email),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Go back!"),
-            ),
-          ),
-        ],
       ),
     );
   }
