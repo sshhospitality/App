@@ -29,4 +29,5 @@ dev_dependencies:
 flutter:
   assets:
     - assets/splash.jpg
+    - assets/logo.jpg
   uses-material-design: true
