@@ -5,8 +5,10 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Menu Page'),
+    return Scaffold(
+      body: Center(
+        child: Text('Menu Page Content'),
+      ),
     );
   }
 }

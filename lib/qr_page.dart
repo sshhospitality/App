@@ -5,8 +5,10 @@ class QRPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('QR Page'),
+    return Scaffold(
+      body: Center(
+        child: Text('QR Page Content'),
+      ),
     );
   }
 }

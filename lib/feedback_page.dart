@@ -33,9 +33,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Feedback'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
