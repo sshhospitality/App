@@ -114,8 +114,8 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        if (emailController.text == "sai@gmail.com" &&
-                            passwordController.text == "123") {
+                        if (emailController.text == "s" &&
+                            passwordController.text == "1") {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
