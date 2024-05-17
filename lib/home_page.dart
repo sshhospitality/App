@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
           userName = data['userInfo']['name'];
           idNumber = data['userInfo']['userId'];
           college = data['userInfo']['college'];
-          mealsCompleted = '${data['transactionsToday']} / 0';
+          mealsCompleted = '${data['transactionsToday']} / 4';
         });
       } else {
         print("Failed to load data, status code: ${response.statusCode}");
