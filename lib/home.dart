@@ -5,6 +5,25 @@ import 'qr_page.dart';
 import 'menu_page.dart';
 import 'profile_page.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+      ),
+      home: const MainHomePage(),
+    );
+  }
+}
+
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
 
@@ -19,7 +38,7 @@ class _MainHomePageState extends State<MainHomePage> {
     const HomePage(),
     const FeedbackPage(),
     const QRPage(),
-    const MenuPage(),
+    MenuPage(), // Updated to MenuPage
     const ProfilePage(),
   ];
 

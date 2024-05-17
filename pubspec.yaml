@@ -33,4 +33,12 @@ flutter:
   assets:
     - assets/splash.jpg
     - assets/logo.jpg
+    - assets/breakfast1.jpg
+    # - assets/breakfast2.jpg
+    - assets/lunch1.jpg
+    # - assets/lunch2.jpg
+    - assets/snacks1.jpg
+    # - assets/snacks2.jpg
+    - assets/dinner1.jpg
+    # - assets/dinner2.jpg
   uses-material-design: true
