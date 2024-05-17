@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
@@ -12,6 +15,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
   final TextEditingController _question1Controller = TextEditingController();
   final TextEditingController _question2Controller = TextEditingController();
   final TextEditingController _question3Controller = TextEditingController();
+  double _rating = 3.0;
+  File? _image;
 
   @override
   void dispose() {
@@ -19,6 +24,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
     _question2Controller.dispose();
     _question3Controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
   }
 
   void _submitFeedback() {
@@ -58,6 +72,29 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 },
               ),
               const SizedBox(height: 16),
+              Text(
+                'Rate your experience:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              RatingBar.builder(
+                initialRating: _rating,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (rating) {
+                  setState(() {
+                    _rating = rating;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _question2Controller,
                 decoration: const InputDecoration(
@@ -84,6 +121,31 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Upload an image (optional):',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: _image == null
+                    ? ElevatedButton(
+                        onPressed: _pickImage,
+                        child: const Text('Choose Image'),
+                      )
+                    : Column(
+                        children: [
+                          Image.file(
+                            _image!,
+                            height: 150,
+                          ),
+                          TextButton(
+                            onPressed: _pickImage,
+                            child: const Text('Change Image'),
+                          ),
+                        ],
+                      ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
