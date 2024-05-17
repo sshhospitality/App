@@ -33,12 +33,13 @@ class MainHomePage extends StatefulWidget {
 
 class _MainHomePageState extends State<MainHomePage> {
   int _selectedIndex = 0;
+  bool _isNotificationVisible = false;
 
   final List<Widget> _widgetOptions = <Widget>[
     const HomePage(),
     const FeedbackPage(),
     const QRPage(),
-    MenuPage(), // Updated to MenuPage
+    MenuPage(),
     const ProfilePage(),
   ];
 
@@ -56,6 +57,12 @@ class _MainHomePageState extends State<MainHomePage> {
     });
   }
 
+  void _toggleNotificationVisibility() {
+    setState(() {
+      _isNotificationVisible = !_isNotificationVisible;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,14 +77,22 @@ class _MainHomePageState extends State<MainHomePage> {
           ),
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {
-              // Handle notification icon press
-            },
+            onPressed: _toggleNotificationVisibility,
           ),
         ],
       ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      body: Stack(
+        children: [
+          Center(
+            child: _widgetOptions.elementAt(_selectedIndex),
+          ),
+          if (_isNotificationVisible)
+            Positioned(
+              top: kToolbarHeight + 10,
+              right: 10,
+              child: _buildNotificationDropdown(),
+            ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -107,6 +122,34 @@ class _MainHomePageState extends State<MainHomePage> {
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         onTap: _onItemTapped,
+      ),
+    );
+  }
+
+  Widget _buildNotificationDropdown() {
+    final notifications = [
+      'Notification 1',
+      'Notification 2',
+      'Notification 3',
+    ];
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        width: 250,
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: notifications.map((notification) {
+            return ListTile(
+              title: Text(notification),
+              onTap: () {
+                // Handle notification tap
+              },
+            );
+          }).toList(),
+        ),
       ),
     );
   }
