@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON encoding/decoding
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +20,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const OnboardingScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -27,23 +31,63 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/splash.jpg'), // Ensure this path is correct and the image exists
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Login(title: 'Mess App')),
-                );
-              },
-              child: const Text('Login'),
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.purple, Colors.red],
+              ),
             ),
-          ],
-        ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.center,
+                radius: 0.5,
+                colors: [Colors.transparent, Colors.black45],
+              ),
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                    'assets/splash.png'), // Ensure this path is correct and the image exists
+                const SizedBox(height: 20),
+                const Text(
+                  'Welcome to Digi Mess System',
+                  style: TextStyle(
+                      fontSize: 24, // You can adjust the font size as needed
+                      fontWeight: FontWeight.bold, // Makes the text bold
+                      color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                const SizedBox(height: 10), // Space between the texts
+                const Text(
+                  'Purity and Harmony in Every Meal',
+                  style: TextStyle(
+                      fontSize: 18, // Adjust font size as needed
+                      fontStyle: FontStyle.italic, // Makes the text italic
+                      color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Login(title: 'Mess App')),
+                    );
+                  },
+                  child: const Text('Login'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -62,6 +106,58 @@ class _LoginState extends State<Login> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  Future<void> _login() async {
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/auth/login'), // Replace with your API endpoint
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'email': emailController.text,
+          'password': passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Response status: ${response.statusCode}');
+        // If the server returns a 200 OK response
+        print('Response headers: ${response.headers}');
+        var cookie = response.headers['set-cookie']!;
+
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        print(responseBody['token']);
+        _loadDetails(responseBody, cookie);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainHomePage(),
+          ),
+        );
+      } else {
+        // If the server did not return a 200 OK response
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid Credentials')),
+        );
+      }
+    } catch (e) {
+      // If an error occurs
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred')),
+      );
+    }
+  }
+
+  void _loadDetails(Map<String, dynamic> responseBody, String cookie) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('email', responseBody['user']['email']);
+    await prefs.setString('person', responseBody['user']['person']);
+    await prefs.setString('token', responseBody['token']);
+    await prefs.setString('_id', responseBody['user']['_id']);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,14 +171,23 @@ class _LoginState extends State<Login> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  'Login into Digi Mess',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                 child: TextFormField(
                   controller: emailController,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: "Email"
-                  ),
+                      border: OutlineInputBorder(), labelText: "Email"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
@@ -92,14 +197,13 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                 child: TextFormField(
                   controller: passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: "Password"
-                  ),
+                      border: OutlineInputBorder(), labelText: "Password"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -109,24 +213,13 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
                 child: Center(
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        if (emailController.text == "s" &&
-                            passwordController.text == "1") {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MainHomePage()
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Invalid Credentials')),
-                          );
-                        }
+                        _login();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Please fill input')),
