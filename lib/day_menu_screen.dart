@@ -2,39 +2,48 @@ import 'package:flutter/material.dart';
 
 class DayMenuScreen extends StatelessWidget {
   final String day;
-  const DayMenuScreen({Key? key, required this.day}) : super(key: key);
+  final dynamic menuData; // Use the appropriate type for menu data
+
+  DayMenuScreen({required this.day, required this.menuData});
+
+  // Function to determine the correct image based on meal type and category
+  String getImage(String mealType, String category) {
+    final mealTypeLower = mealType.toLowerCase();
+    final categoryLower = category.toLowerCase();
+
+    if (mealTypeLower.contains('breakfast')) {
+      return categoryLower == 'veg'
+          ? 'assets/breakfast_veg.jpg'
+          : 'assets/breakfast_non_veg.jpg';
+    } else if (mealTypeLower.contains('lunch')) {
+      return categoryLower == 'veg'
+          ? 'assets/lunch_veg.jpg'
+          : 'assets/lunch_non_veg.jpg';
+    } else if (mealTypeLower.contains('snacks')) {
+      return categoryLower == 'veg'
+          ? 'assets/snacks_veg.jpg'
+          : 'assets/snacks_non_veg.jpg';
+    } else if (mealTypeLower.contains('dinner')) {
+      return categoryLower == 'veg'
+          ? 'assets/dinner_veg.jpg'
+          : 'assets/dinner_non_veg.jpg';
+    } else {
+      return 'assets/default.jpg'; // Fallback image
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final mealSections = {
-      'Breakfast': [
-        {'image': 'assets/breakfast_veg.jpg', 'caption': 'Pancakes with syrup', 'isVeg': true},
-        {'image': 'assets/breakfast_non_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': false},
-        {'image': 'assets/breakfast_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': true},
-        {'image': 'assets/breakfast_non_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': false},
-      ],
-      'Lunch': [
-        {'image': 'assets/lunch_veg.jpg', 'caption': 'Grilled chicken with salad', 'isVeg': false},
-        {'image': 'assets/lunch_veg.jpg', 'caption': 'Vegetable pasta', 'isVeg': true},
-      ],
-      'Snacks': [
-        {'image': 'assets/snacks_veg.jpg', 'caption': 'Fruit smoothie', 'isVeg': true},
-        {'image': 'assets/snacks_veg.jpg', 'caption': 'Granola bar', 'isVeg': true},
-      ],
-      'Dinner': [
-        {'image': 'assets/dinner_non_veg.jpg', 'caption': 'Steak with mashed potatoes', 'isVeg': false},
-        {'image': 'assets/dinner_veg.jpg', 'caption': 'Vegetable stir-fry', 'isVeg': true},
-      ],
-    };
-
     return Scaffold(
       appBar: AppBar(
         title: Text('$day\'s Menu'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
-        children: mealSections.keys.map((mealType) {
-          final items = mealSections[mealType]!;
+        children: menuData['meals'].map<Widget>((meal) {
+          final String mealType = meal['type'];
+          final List<dynamic> items = meal['items'];
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -42,7 +51,10 @@ class DayMenuScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   mealType,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple),
                 ),
               ),
               SizedBox(
@@ -50,7 +62,7 @@ class DayMenuScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: items.map((item) {
+                    children: items.map<Widget>((item) {
                       return Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: SizedBox(
@@ -58,18 +70,22 @@ class DayMenuScreen extends StatelessWidget {
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: Card(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
                               elevation: 5,
                               child: Stack(
                                 children: [
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: ClipRRect(
-                                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(16)),
                                           child: Image.asset(
-                                            item['image'] as String, // Cast to String
+                                            getImage(
+                                                mealType, item['category']),
                                             width: double.infinity,
                                             fit: BoxFit.cover,
                                           ),
@@ -78,8 +94,9 @@ class DayMenuScreen extends StatelessWidget {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
-                                          item['caption'] as String, // Cast to String
-                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                          item['name'],
+                                          style: TextStyle(
+                                              fontSize: 14, color: Colors.grey),
                                         ),
                                       ),
                                     ],
@@ -90,13 +107,17 @@ class DayMenuScreen extends StatelessWidget {
                                     child: Container(
                                       padding: EdgeInsets.all(4),
                                       decoration: BoxDecoration(
-                                        color: item['isVeg'] as bool ? Colors.green : Colors.red, // Cast to bool
+                                        color: item['category'] == 'Veg'
+                                            ? Colors.green
+                                            : Colors.red,
                                         borderRadius: BorderRadius.only(
                                           topLeft: Radius.circular(8),
                                         ),
                                       ),
                                       child: Icon(
-                                        item['isVeg'] as bool ? Icons.eco : Icons.auto_awesome, // Cast to bool
+                                        item['category'] == 'Veg'
+                                            ? Icons.eco
+                                            : Icons.auto_awesome,
                                         color: Colors.white,
                                         size: 18,
                                       ),
