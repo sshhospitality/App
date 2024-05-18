@@ -3,6 +3,9 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:dio/dio.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({Key? key}) : super(key: key);
@@ -26,6 +29,24 @@ class _FeedbackPageState extends State<FeedbackPage> {
   void initState() {
     super.initState();
     _loadUserDetails();
+  }
+
+  void setMessage(String message) {
+    setState(() {
+      _messageController.text = message;
+    });
+  }
+
+  void setRating(double rating) {
+    setState(() {
+      _rating = rating;
+    });
+  }
+
+  void setFile(File? file) {
+    setState(() {
+      _image = file;
+    });
   }
 
   Future<void> _loadUserDetails() async {
@@ -56,12 +77,64 @@ class _FeedbackPageState extends State<FeedbackPage> {
     });
   }
 
-  void _submitFeedback() {
-    if (_formKey.currentState!.validate()) {
-      // Handle form submission (e.g., send data to server or show a confirmation message)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Feedback submitted!')),
+  void submitFeedback() async {
+    try {
+      FormData formData = FormData.fromMap({
+        'name': _name,
+        'userId': _id,
+        'email': _email,
+        'message': _messageController.text,
+        'rating': _rating,
+      });
+
+      if (_image != null) {
+        formData.files.add(MapEntry(
+          'image',
+          await MultipartFile.fromFile(
+            _image!.path,
+            filename: 'image.jpg',
+            contentType:
+                MediaType('image', 'jpeg'), // Adjust content type accordingly
+          ),
+        ));
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      final String sessionCookie = await prefs.getString('token') ?? 'N/A';
+      var cookie = 'token=$sessionCookie';
+
+      final response = await Dio().post(
+        'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/feedback/feedback_post',
+        data: formData,
+        options: Options(
+          headers: {
+            'Cookie': cookie,
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
       );
+
+      print('Response: ${response.data}');
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text('Feedback Submitted'),
+          content: Text('Thank you for your feedback!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setMessage('');
+                setRating(0);
+                setFile(null);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      print('Error: $error');
     }
   }
 
@@ -151,7 +224,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _submitFeedback,
+                onPressed: submitFeedback,
                 child: const Text('Submit'),
               ),
             ],

@@ -155,7 +155,12 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 8),
             PieChartSection(),
             const SizedBox(height: 8),
-            PollSection(polls: _polls),
+            PollSection(
+              polls: _polls,
+              onPollSubmitted: () {
+                fetchPolls(); // Call fetchPolls when a poll is submitted
+              },
+            ),
           ],
         ),
       ),
@@ -427,8 +432,11 @@ class PieChartSection extends StatelessWidget {
 
 class PollSection extends StatelessWidget {
   final List<Map<String, dynamic>> polls;
+  final VoidCallback onPollSubmitted; // Callback function
 
-  const PollSection({required this.polls, super.key});
+  const PollSection(
+      {required this.polls, required this.onPollSubmitted, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -451,7 +459,7 @@ class PollSection extends StatelessWidget {
           itemCount: polls.length,
           itemBuilder: (context, index) {
             final poll = polls[index];
-            return PollItem(poll: poll);
+            return PollItem(poll: poll, onPollSubmitted: onPollSubmitted);
           },
         ),
       ],
@@ -461,11 +469,15 @@ class PollSection extends StatelessWidget {
 
 class PollItem extends StatelessWidget {
   final Map<String, dynamic> poll;
+  final VoidCallback onPollSubmitted; // Callback function
 
-  const PollItem({required this.poll, super.key});
+  const PollItem({required this.poll, required this.onPollSubmitted, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print(poll);
+    final String pollId = poll['_id'];
     final String pollQuestion = poll['question'] ?? 'No question available';
     final List<dynamic> options = poll['options'] ?? [];
 
@@ -486,22 +498,67 @@ class PollItem extends StatelessWidget {
             const SizedBox(height: 8),
             Column(
               children: options.map((option) {
-                final String optionText = option['text'] ?? 'No text';
-                return ListTile(
-                  title: Text(optionText),
-                  leading: Radio(
-                    value: optionText,
-                    groupValue: poll['selectedOption'],
-                    onChanged: (value) {
-                      // Implement the logic to handle option selection
-                    },
-                  ),
-                );
+                final String? optionText =
+                    option['option']; // Note the nullable type
+                if (optionText != null) {
+                  return ListTile(
+                    title: Text(optionText),
+                    leading: Radio(
+                      value: optionText,
+                      groupValue: poll['selectedOption'],
+                      onChanged: (value) {
+                        submitAnswer(
+                            pollId, optionText); // Pass optionText directly
+                      },
+                    ),
+                  );
+                } else {
+                  // Handle case where optionText is null
+                  return Container(); // or any other widget or message
+                }
               }).toList(),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> submitAnswer(String pollId, String optionText) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? sessionCookie = prefs.getString('token');
+      print(optionText);
+      print(pollId);
+      if (sessionCookie != null) {
+        var cookie = 'token=$sessionCookie';
+        final response = await http.post(
+          Uri.parse(
+              'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/poll/answer/$pollId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'cookie': cookie,
+          },
+          body: jsonEncode(<String, String>{
+            'option': optionText,
+          }),
+        );
+        print(response.statusCode);
+        if (response.statusCode == 200) {
+          onPollSubmitted();
+          // Handle successful response
+          print('Answer submitted successfully');
+        } else {
+          // Handle error
+          print('Failed to submit answer');
+        }
+      } else {
+        // Handle case where sessionCookie is null
+        print('Session cookie is null');
+      }
+    } catch (e) {
+      // Handle exception
+      print('Error: $e');
+    }
   }
 }

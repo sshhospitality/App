@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
+import 'package:http/http.dart' as http;
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -63,17 +64,38 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.clear(); // Clear the shared preferences
+                  try {
+                    // Call the backend logout endpoint
+                    final SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    final String sessionCookie = prefs.getString('token') ?? '';
+                    final response = await http.post(
+                      Uri.parse(
+                          'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/auth/logout'),
+                      headers: <String, String>{
+                        'Content-Type': 'application/json; charset=UTF-8',
+                        'cookie': 'token=$sessionCookie',
+                      },
+                    );
 
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const OnboardingScreen()), // Navigate to the OnboardingScreen
-                    (Route<dynamic> route) =>
-                        false, // Remove all previous routes
-                  );
+                    if (response.statusCode == 200) {
+                      // Logout successful, clear local data
+                      await prefs.clear();
+                      // Navigate to the OnboardingScreen
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const OnboardingScreen()),
+                        (Route<dynamic> route) => false,
+                      );
+                    } else {
+                      // Handle backend logout failure
+                      print('Backend logout failed');
+                    }
+                  } catch (e) {
+                    // Handle exceptions
+                    print('Error during logout: $e');
+                  }
                 },
                 child: const Text('Logout'),
               ),
