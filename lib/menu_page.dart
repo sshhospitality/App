@@ -108,33 +108,50 @@ class _MenuPageState extends State<MenuPage> {
           ? Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(16.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: days.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => handleDayTap(days[index]),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blueGrey[900],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          days[index],
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
+              child: Stack(
+                children: days.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  String day = entry.value;
+                  return Positioned(
+                    top: index * 70.0,
+                    left: index % 2 == 0 ? 0 : 20.0,
+                    right: index % 2 == 0 ? 20.0 : 0,
+                    child: GestureDetector(
+                      onTap: () => handleDayTap(day),
+                      child: Container(
+                        height: 60,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).primaryColor.withOpacity(0.8),
+                              Theme.of(context).primaryColor.withOpacity(0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 8,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            day,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   );
-                },
+                }).toList(),
               ),
             ),
     );

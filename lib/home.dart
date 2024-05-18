@@ -15,6 +15,14 @@ class MainHomePage extends StatefulWidget {
 class _MainHomePageState extends State<MainHomePage> {
   int _selectedIndex = 0;
   bool _isNotificationVisible = false;
+  List<String> _notifications = [
+    "Notification 1",
+    "Notification 2",
+    "Notification 3",
+    "Notification 4",
+    "Notification 5",
+    "Notification 6",
+  ];
 
   final List<Widget> _widgetOptions = <Widget>[
     const HomePage(),
@@ -51,10 +59,11 @@ class _MainHomePageState extends State<MainHomePage> {
         title: Text(_appBarTitles[_selectedIndex]),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications, color: Colors.white),
             onPressed: _toggleNotificationVisibility,
           ),
-        ],leading: SizedBox(width: 5),
+        ],
+        leading: SizedBox(width: 5),
       ),
       body: Stack(
         children: [
@@ -64,27 +73,34 @@ class _MainHomePageState extends State<MainHomePage> {
               top: 0,
               right: 0,
               child: Container(
-                width: 200,
+                width: MediaQuery.of(context).size.width * 0.6,
                 height: 200,
-                color: Colors.deepPurple,
-                child: ListView(
-                  children: const [
-                    ListTile(
-                      title: Text(
-                        'Notification 1',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 233, 254, 249),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
                     ),
-                    ListTile(
-                      title: Text(
-                        'Notification 2',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    ListTile(
-                      title: Text(
-                        'Notification 3',
-                        style: TextStyle(color: Colors.white),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: _notifications.length,
+                        separatorBuilder: (BuildContext context, int index) =>
+                            const Divider(
+                              color: Colors.grey,
+                              height: 1,
+                            ),
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(
+                              _notifications[index],
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
