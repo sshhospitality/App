@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 
 class DayMenuScreen extends StatelessWidget {
   final String day;
-  const DayMenuScreen({super.key, required this.day});
+  const DayMenuScreen({Key? key, required this.day}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Dummy data for each meal section
     final mealSections = {
       'Breakfast': [
         {'image': 'assets/breakfast1.jpg', 'caption': 'Pancakes with syrup'},
+        {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
+        {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
         {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
       ],
       'Lunch': [
@@ -37,41 +38,54 @@ class DayMenuScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.shade100,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   mealType,
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                 ),
               ),
-              const SizedBox(height: 10),
-              ...items.map((item) {
-                return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(8.0),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        item['image']!,
-                        height: 80,
-                        width: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    title: Text(
-                      item['caption']!,
-                      style: const TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
+              SizedBox(
+                height: 180,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: items.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: SizedBox(
+                          width: 160,
+                          child: Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 5,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                  child: Image.asset(
+                                    item['image']!,
+                                    height: 100,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    item['caption']!,
+                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
+                ),
+              ),
               const SizedBox(height: 20), // Add some space between sections
             ],
           );
