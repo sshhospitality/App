@@ -123,7 +123,7 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         print('Response status: ${response.statusCode}');
         // If the server returns a 200 OK response
-        print('Response headers: ${response.headers}');
+        print('Response headers: ${response.body}');
         var cookie = response.headers['set-cookie']!;
 
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
