@@ -18,12 +18,15 @@ class _HomePageState extends State<HomePage> {
   late String upcomingMeal = '';
   late String mealsCompleted = '';
   late String meal = "";
+  bool _isPollVisible = false;
+  List<Map<String, dynamic>> _polls = [];
 
   @override
   void initState() {
     super.initState();
     fetchData();
     determineMeal();
+    fetchPolls();
   }
 
   void determineMeal() {
@@ -83,6 +86,33 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> fetchPolls() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String sessionCookie = prefs.getString('token') ?? 'N/A';
+      var cookie = 'token=$sessionCookie';
+      final response = await http.get(
+        Uri.parse(
+            'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/poll/poll'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': cookie,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(response.body);
+        setState(() {
+          _polls = responseData.cast<Map<String, dynamic>>();
+        });
+      } else {
+        throw Exception('Failed to load polls');
+      }
+    } catch (e) {
+      print('Error fetching polls: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -121,6 +151,8 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 8),
             PieChartSection(),
+            const SizedBox(height: 8),
+            PollSection(polls: _polls),
           ],
         ),
       ),
@@ -407,6 +439,119 @@ class _PieChartSectionState extends State<PieChartSection> {
                   showChartValuesOutside: false,
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class PollSection extends StatelessWidget {
+  final List<Map<String, dynamic>> polls;
+
+  const PollSection({required this.polls});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Polls',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: polls.map((poll) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: PollItem(
+                  title: poll['title'],
+                  question: poll['question'],
+                  pollId: poll['_id'],
+                  options: List<Map<String, dynamic>>.from(poll['options']),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class PollItem extends StatelessWidget {
+  final String title;
+  final String question;
+  final List<Map<String, dynamic>> options;
+  final String pollId; // Add pollId to the PollItem
+
+  const PollItem({
+    required this.title,
+    required this.question,
+    required this.options,
+    required this.pollId,
+  });
+
+  Future<void> submitAnswer(String option) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String sessionCookie = prefs.getString('token') ?? 'N/A';
+    var cookie = 'token=$sessionCookie';
+    final response = await http.post(
+      Uri.parse(
+          'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/poll/answer/$pollId'), // Replace with your API endpoint
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'cookie': cookie,
+      },
+      body: jsonEncode({'option': option}),
+    );
+
+    if (response.statusCode == 200) {
+      // Handle successful response
+      print('Answer submitted successfully');
+    } else {
+      // Handle error
+      print('Failed to submit answer: ${response.statusCode}');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              question,
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            // Wrap the ListView.builder with Flexible widget
+            Flexible(
+              child: ListView.builder(
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options[index];
+                  return ListTile(
+                    title: Text(option['option']),
+                    onTap: () {
+                      submitAnswer(option['option']);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
