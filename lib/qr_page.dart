@@ -38,7 +38,7 @@ class _QRPageState extends State<QRPage> {
               child: const Text('Scan QR'),
             ),
             const SizedBox(height: 20.0),
-            Text(qrResult),
+            // Text(qrResult),
           ],
         ),
       ),

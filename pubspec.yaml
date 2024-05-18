@@ -1,4 +1,4 @@
-name: mess_app
+name: digi_mess
 description: "A new Flutter project."
 publish_to: 'none'
 version: 1.0.0+1
@@ -40,7 +40,6 @@ dev_dependencies:
 
 flutter:
   assets:
-    - assets/splash.jpg
     - assets/logo.jpg
     - assets/
     - assets/breakfast_veg.jpg
@@ -52,3 +51,8 @@ flutter:
     - assets/dinner_veg.jpg
     # - assets/dinner2.jpg
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.jpg"

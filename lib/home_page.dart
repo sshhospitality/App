@@ -149,18 +149,13 @@ class _HomePageState extends State<HomePage> {
             MealTimeline(),
             const SizedBox(height: 24),
             Text(
-              'Dinning Chart for this month',
+              'Dining Chart for this month',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             PieChartSection(),
             const SizedBox(height: 8),
-            PollSection(
-              polls: _polls,
-              onPollSubmitted: () {
-                fetchPolls(); // Call fetchPolls when a poll is submitted
-              },
-            ),
+            PollSection(polls: _polls),
           ],
         ),
       ),
@@ -178,6 +173,7 @@ class InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8.0),
+      color: Colors.lightBlue[50], // Light color for better UI
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -311,15 +307,15 @@ class _MealTimelineState extends State<MealTimeline> {
   Color getMealColor(String mealType) {
     switch (mealType) {
       case 'Breakfast':
-        return Colors.blue;
+        return Colors.blue[300]!;
       case 'Lunch':
-        return Colors.green;
+        return Colors.green[300]!;
       case 'Snacks':
-        return Colors.orange;
+        return Colors.orange[300]!;
       case 'Dinner':
-        return Colors.red;
+        return Colors.red[300]!;
       default:
-        return Colors.grey;
+        return Colors.grey[300]!;
     }
   }
 
@@ -385,13 +381,14 @@ class PieChartSection extends StatelessWidget {
     };
 
     final colorList = <Color>[
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.red,
+      Colors.blue[300]!,
+      Colors.green[300]!,
+      Colors.orange[300]!,
+      Colors.red[300]!,
     ];
 
     return Card(
+      color: Colors.lightBlue[50], // Light color for better UI
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -432,11 +429,8 @@ class PieChartSection extends StatelessWidget {
 
 class PollSection extends StatelessWidget {
   final List<Map<String, dynamic>> polls;
-  final VoidCallback onPollSubmitted; // Callback function
 
-  const PollSection(
-      {required this.polls, required this.onPollSubmitted, Key? key})
-      : super(key: key);
+  const PollSection({required this.polls, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -459,7 +453,7 @@ class PollSection extends StatelessWidget {
           itemCount: polls.length,
           itemBuilder: (context, index) {
             final poll = polls[index];
-            return PollItem(poll: poll, onPollSubmitted: onPollSubmitted);
+            return PollItem(poll: poll);
           },
         ),
       ],
@@ -469,20 +463,17 @@ class PollSection extends StatelessWidget {
 
 class PollItem extends StatelessWidget {
   final Map<String, dynamic> poll;
-  final VoidCallback onPollSubmitted; // Callback function
 
-  const PollItem({required this.poll, required this.onPollSubmitted, Key? key})
-      : super(key: key);
+  const PollItem({required this.poll, super.key});
 
   @override
   Widget build(BuildContext context) {
-    print(poll);
-    final String pollId = poll['_id'];
     final String pollQuestion = poll['question'] ?? 'No question available';
     final List<dynamic> options = poll['options'] ?? [];
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
+      color: Colors.lightBlue[50], // Light color for better UI
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -498,24 +489,17 @@ class PollItem extends StatelessWidget {
             const SizedBox(height: 8),
             Column(
               children: options.map((option) {
-                final String? optionText =
-                    option['option']; // Note the nullable type
-                if (optionText != null) {
-                  return ListTile(
-                    title: Text(optionText),
-                    leading: Radio(
-                      value: optionText,
-                      groupValue: poll['selectedOption'],
-                      onChanged: (value) {
-                        submitAnswer(
-                            pollId, optionText); // Pass optionText directly
-                      },
-                    ),
-                  );
-                } else {
-                  // Handle case where optionText is null
-                  return Container(); // or any other widget or message
-                }
+                final String optionText = option['text'] ?? 'No text';
+                return ListTile(
+                  title: Text(optionText),
+                  leading: Radio(
+                    value: optionText,
+                    groupValue: poll['selectedOption'],
+                    onChanged: (value) {
+                      // Implement the logic to handle option selection
+                    },
+                  ),
+                );
               }).toList(),
             ),
           ],
@@ -523,42 +507,25 @@ class PollItem extends StatelessWidget {
       ),
     );
   }
+}
 
-  Future<void> submitAnswer(String pollId, String optionText) async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? sessionCookie = prefs.getString('token');
-      print(optionText);
-      print(pollId);
-      if (sessionCookie != null) {
-        var cookie = 'token=$sessionCookie';
-        final response = await http.post(
-          Uri.parse(
-              'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/poll/answer/$pollId'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'cookie': cookie,
-          },
-          body: jsonEncode(<String, String>{
-            'option': optionText,
-          }),
+class NotificationsDropdown extends StatelessWidget {
+  final List<String> notifications;
+
+  const NotificationsDropdown({required this.notifications, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      items: notifications.map((String notification) {
+        return DropdownMenuItem<String>(
+          value: notification,
+          child: Text(notification),
         );
-        print(response.statusCode);
-        if (response.statusCode == 200) {
-          onPollSubmitted();
-          // Handle successful response
-          print('Answer submitted successfully');
-        } else {
-          // Handle error
-          print('Failed to submit answer');
-        }
-      } else {
-        // Handle case where sessionCookie is null
-        print('Session cookie is null');
-      }
-    } catch (e) {
-      // Handle exception
-      print('Error: $e');
-    }
+      }).toList(),
+      onChanged: (_) {},
+      hint: Text('Notifications (${notifications.length})'),
+      isExpanded: true,
+    );
   }
 }
