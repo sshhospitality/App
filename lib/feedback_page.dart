@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FeedbackPage extends StatefulWidget {
-  const FeedbackPage({super.key});
+  const FeedbackPage({Key? key}) : super(key: key);
 
   @override
   _FeedbackPageState createState() => _FeedbackPageState();
@@ -12,22 +13,42 @@ class FeedbackPage extends StatefulWidget {
 
 class _FeedbackPageState extends State<FeedbackPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _question1Controller = TextEditingController();
-  final TextEditingController _question2Controller = TextEditingController();
-  final TextEditingController _question3Controller = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
   double _rating = 3.0;
   File? _image;
 
+  String? _id;
+  String? _name;
+  String? _email;
+  String? _phoneNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserDetails();
+  }
+
+  Future<void> _loadUserDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _id = prefs.getString('idnumber');
+      _name = prefs.getString('name');
+      _email = prefs.getString('email');
+      _phoneNumber = prefs.getString('phone');
+    });
+    print(_id);
+    print(prefs.getString('idnumber') ?? 'No ID');
+  }
+
   @override
   void dispose() {
-    _question1Controller.dispose();
-    _question2Controller.dispose();
-    _question3Controller.dispose();
+    _messageController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     setState(() {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
@@ -58,15 +79,24 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
+              _buildFixedTextField('ID', _id ?? ''),
+              const SizedBox(height: 16),
+              _buildFixedTextField('Name', _name ?? ''),
+              const SizedBox(height: 16),
+              _buildFixedTextField('Email', _email ?? ''),
+              const SizedBox(height: 16),
+              _buildFixedTextField('Phone Number', _phoneNumber ?? ''),
+              const SizedBox(height: 16),
               TextFormField(
-                controller: _question1Controller,
+                controller: _messageController,
+                maxLines: 3,
                 decoration: const InputDecoration(
-                  labelText: 'How was your meal?',
+                  labelText: 'Message',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please answer this question';
+                    return 'Please enter your message';
                   }
                   return null;
                 },
@@ -92,34 +122,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   setState(() {
                     _rating = rating;
                   });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _question2Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Rate the cleanliness of the dining area',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please answer this question';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _question3Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Any suggestions for improvement?',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please answer this question';
-                  }
-                  return null;
                 },
               ),
               const SizedBox(height: 16),
@@ -158,5 +160,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
       ),
     );
   }
-}
 
+  Widget _buildFixedTextField(String labelText, String initialValue) {
+    return TextFormField(
+      initialValue: initialValue,
+      enabled: false,
+      decoration: InputDecoration(
+        labelText: "$labelText : $initialValue",
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+}

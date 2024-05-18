@@ -72,6 +72,9 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         await prefs.setString('name', data['userInfo']['name']);
         await prefs.setString('college', data['userInfo']['college']);
+        await prefs.setString('phone', data['userInfo']['phone'].toString());
+        await prefs.setString(
+            'idnumber', data['userInfo']['userId'].toString());
         setState(() {
           userName = data['userInfo']['name'];
           idNumber = data['userInfo']['userId'];
