@@ -14,10 +14,33 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Digi Mess System',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primaryColor: Colors.deepPurple,
+        scaffoldBackgroundColor: Colors.white,
+        textTheme: const TextTheme(
+          // bodyText1: TextStyle(fontSize: 18, color: Colors.black),
+          // bodyText2: TextStyle(fontSize: 16, color: Colors.black),
+          // headline6: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+          // subtitle1: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            // primary: Colors.deepPurple,
+            textStyle: const TextStyle(fontSize: 18),
+          ),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.deepPurple,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
       home: const OnboardingScreen(),
       debugShowCheckedModeBanner: false,
@@ -34,20 +57,11 @@ class OnboardingScreen extends StatelessWidget {
       body: Stack(
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Colors.purple, Colors.red],
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 0.5,
-                colors: [Colors.transparent, Colors.black45],
+                colors: [Colors.deepPurple, Colors.purple],
               ),
             ),
           ),
@@ -55,31 +69,31 @@ class OnboardingScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                    'assets/splash.png'), // Ensure this path is correct and the image exists
+                Image.asset('assets/splash.png'), // Ensure this path is correct and the image exists
                 const SizedBox(height: 20),
                 const Text(
                   'Welcome to Digi Mess System',
                   style: TextStyle(
-                      fontSize: 24, // You can adjust the font size as needed
-                      fontWeight: FontWeight.bold, // Makes the text bold
-                      color: Color.fromARGB(255, 255, 255, 255)),
+                    fontSize: 24, // You can adjust the font size as needed
+                    fontWeight: FontWeight.bold, // Makes the text bold
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 10), // Space between the texts
                 const Text(
                   'Purity and Harmony in Every Meal',
                   style: TextStyle(
-                      fontSize: 18, // Adjust font size as needed
-                      fontStyle: FontStyle.italic, // Makes the text italic
-                      color: Color.fromARGB(255, 255, 255, 255)),
+                    fontSize: 18, // Adjust font size as needed
+                    fontStyle: FontStyle.italic, // Makes the text italic
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const Login(title: 'Mess App')),
+                      MaterialPageRoute(builder: (context) => const Login(title: 'Mess App')),
                     );
                   },
                   child: const Text('Login'),
@@ -109,8 +123,7 @@ class _LoginState extends State<Login> {
   Future<void> _login() async {
     try {
       final response = await http.post(
-        Uri.parse(
-            'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/auth/login'), // Replace with your API endpoint
+        Uri.parse('https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/auth/login'), // Replace with your API endpoint
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -121,13 +134,9 @@ class _LoginState extends State<Login> {
       );
 
       if (response.statusCode == 200) {
-        print('Response status: ${response.statusCode}');
-        // If the server returns a 200 OK response
-        print('Response headers: ${response.body}');
         var cookie = response.headers['set-cookie']!;
 
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
-        print(responseBody['token']);
         _loadDetails(responseBody, cookie);
         Navigator.pushReplacement(
           context,
@@ -136,13 +145,11 @@ class _LoginState extends State<Login> {
           ),
         );
       } else {
-        // If the server did not return a 200 OK response
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invalid Credentials')),
         );
       }
     } catch (e) {
-      // If an error occurs
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred')),
       );
@@ -175,19 +182,21 @@ class _LoginState extends State<Login> {
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Text(
                   'Login into Digi Mess',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                 child: TextFormField(
                   controller: emailController,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: "Email"),
+                    border: OutlineInputBorder(),
+                    labelText: "Email",
+                    labelStyle: TextStyle(color: Colors.deepPurple),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.deepPurple),
+                    ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
@@ -197,13 +206,18 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                 child: TextFormField(
                   controller: passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: "Password"),
+                    border: OutlineInputBorder(),
+                    labelText: "Password",
+                    labelStyle: TextStyle(color: Colors.deepPurple),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.deepPurple),
+                    ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -213,8 +227,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
                 child: Center(
                   child: ElevatedButton(
                     onPressed: () {

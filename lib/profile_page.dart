@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'main.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -42,7 +43,8 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('assets/hero1.jpg'), // Ensure this path is correct
+                backgroundImage: AssetImage(
+                    'assets/hero1.jpg'), // Ensure this path is correct
               ),
               const SizedBox(height: 16),
               Text(
@@ -59,6 +61,22 @@ class _ProfilePageState extends State<ProfilePage> {
                 college,
                 style: TextStyle(fontSize: 18),
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.clear(); // Clear the shared preferences
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const OnboardingScreen()), // Navigate to the OnboardingScreen
+                    (Route<dynamic> route) =>
+                        false, // Remove all previous routes
+                  );
+                },
+                child: const Text('Logout'),
+              ),
             ],
           ),
         ),
@@ -66,4 +84,3 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-
