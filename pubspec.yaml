@@ -39,6 +39,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.jpg"
 
 flutter:
   assets:
@@ -53,8 +59,3 @@ flutter:
     - assets/dinner_veg.jpg
     # - assets/dinner2.jpg
   uses-material-design: true
-
-flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/logo.jpg"
