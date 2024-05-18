@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -24,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     fetchData();
     determineMeal();
   }
+
   void determineMeal() {
     final DateTime now = DateTime.now();
     final int currentHour = now.hour;
@@ -102,20 +104,24 @@ class _HomePageState extends State<HomePage> {
               children: [
                 InfoTile(title: 'College', content: college),
                 InfoTile(title: 'ID Number', content: idNumber),
-                InfoTile(title: 'Upcoming Meal', content:meal),
+                InfoTile(title: 'Upcoming Meal', content: meal),
                 InfoTile(title: 'Transactions Today', content: mealsCompleted),
               ],
             ),
             const SizedBox(height: 24),
             Text(
-              'Upcoming Meal',
+              'Meal Timeline',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            MealTile(
-              mealName: 'Breakfast',
-              items: ['Bread', 'Butter', 'Eggs', 'Juice'],
+            MealTimeline(),
+            const SizedBox(height: 24),
+            Text(
+              'Meal Distribution',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 8),
+            PieChartSection(),
           ],
         ),
       ),
@@ -154,28 +160,106 @@ class InfoTile extends StatelessWidget {
   }
 }
 
-class MealTile extends StatelessWidget {
-  final String mealName;
-  final List<String> items;
-
-  const MealTile({required this.mealName, required this.items, super.key});
+class MealTimeline extends StatelessWidget {
+  final meals = [
+    {
+      'mealName': 'Breakfast',
+      'items': ['Bread', 'Butter', 'Eggs', 'Juice'],
+      'icon': Icons.breakfast_dining
+    },
+    {
+      'mealName': 'Lunch',
+      'items': ['Rice', 'Chicken', 'Vegetables', 'Salad'],
+      'icon': Icons.lunch_dining
+    },
+    {
+      'mealName': 'Snacks',
+      'items': ['Samosa', 'Tea', 'Biscuits'],
+      'icon': Icons.fastfood
+    },
+    {
+      'mealName': 'Dinner',
+      'items': ['Chapati', 'Dal', 'Paneer', 'Rice'],
+      'icon': Icons.dinner_dining
+    }
+  ];
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: meals.map((meal) {
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Icon(meal['icon'] as IconData, size: 40),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        meal['mealName'] as String,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                        children: (meal['items'] as List<String>).map((item) {
+                          return Chip(
+                            label: Text(item),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class PieChartSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    Map<String, double> dataMap = {
+      "Breakfast": 5,
+      "Lunch": 3,
+      "Snacks": 2,
+      "Dinner": 4,
+    };
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              mealName,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        child: PieChart(
+          dataMap: dataMap,
+          chartType: ChartType.ring,
+          chartRadius: MediaQuery.of(context).size.width / 3,
+          ringStrokeWidth: 32,
+          legendOptions: LegendOptions(
+            showLegendsInRow: false,
+            legendPosition: LegendPosition.right,
+            showLegends: true,
+            legendShape: BoxShape.circle,
+            legendTextStyle: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 8),
-            ...items.map((item) => Text(item)).toList(),
-          ],
+          ),
+          chartValuesOptions: ChartValuesOptions(
+            showChartValueBackground: true,
+            showChartValues: true,
+            showChartValuesInPercentage: false,
+            showChartValuesOutside: false,
+          ),
         ),
       ),
     );
