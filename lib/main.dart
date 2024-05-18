@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import for SystemChrome
 import 'home.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For JSON encoding/decoding
@@ -7,6 +8,11 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
 
 void main() {
+  // Set the background color of the notification bar to white
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.white, // Background color of the status bar
+    statusBarIconBrightness: Brightness.dark, // Dark icons for the status bar
+  ));
   runApp(const MyApp());
 }
 
@@ -21,18 +27,6 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         primaryColor: Colors.deepPurple,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          // bodyText1: TextStyle(fontSize: 18, color: Colors.black),
-          // bodyText2: TextStyle(fontSize: 16, color: Colors.black),
-          // headline6: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-          // subtitle1: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            // primary: Colors.deepPurple,
-            textStyle: const TextStyle(fontSize: 18),
-          ),
-        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.deepPurple,
           elevation: 0,
@@ -41,6 +35,10 @@ class MyApp extends StatelessWidget {
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
+          ),
+          systemOverlayStyle: SystemUiOverlayStyle( // Set the background color of the notification bar
+            statusBarColor: Colors.white,
+            statusBarIconBrightness: Brightness.dark,
           ),
         ),
       ),
@@ -77,8 +75,11 @@ class OnboardingScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/splash.jpg'), // Ensure this path is correct and the image exists
-                const SizedBox(height: 20),
+                const Spacer(), // Add space above the content
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+                  child: Image.asset('assets/splash.jpg'), // Ensure this path is correct and the image exists
+                ),
                 const Text(
                   'Welcome to Digi Mess System',
                   style: TextStyle(
@@ -96,16 +97,24 @@ class OnboardingScreen extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Login(title: 'Digi Mess')),
-                    );
-                  },
-                  child: const Text('Login'),
+                const Spacer(), // Add space below the text
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      textStyle: const TextStyle(fontSize: 20),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Login(title: 'Digi Mess')),
+                      );
+                    },
+                    child: const Text('Login'),
+                  ),
                 ),
+                const SizedBox(height: 100), // Additional spacing below the button
               ],
             ),
           ),
@@ -238,6 +247,10 @@ class _LoginState extends State<Login> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
                 child: Center(
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      textStyle: const TextStyle(fontSize: 20),
+                    ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _login();
