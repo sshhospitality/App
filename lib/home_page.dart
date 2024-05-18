@@ -172,7 +172,7 @@ class InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      color: Colors.lightBlue[50],
+      color: Color.fromARGB(255, 232, 225, 243),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -554,7 +554,7 @@ class PieChartSection extends StatelessWidget {
     ];
 
     return Card(
-      color: Colors.lightBlue[50],
+      color: Color.fromARGB(255, 232, 225, 243),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -639,7 +639,7 @@ class PollItem extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: Colors.lightBlue[50],
+      color: Color.fromARGB(255, 232, 225, 243),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

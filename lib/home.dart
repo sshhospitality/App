@@ -113,7 +113,7 @@ class _MainHomePageState extends State<MainHomePage> {
                 width: MediaQuery.of(context).size.width * 0.6,
                 height: 200,
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 233, 254, 249),
+                  color: Color.fromARGB(255, 209, 185, 247),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
