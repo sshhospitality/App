@@ -3,6 +3,8 @@ import 'home.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For JSON encoding/decoding
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:page_transition/page_transition.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,7 +44,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const OnboardingScreen(),
+      home: AnimatedSplashScreen(
+        splash: Image.asset("assets/splash.jpg"),
+        nextScreen: const OnboardingScreen(),
+        splashTransition: SplashTransition.slideTransition,
+        pageTransitionType: PageTransitionType.bottomToTop,
+        duration: 1500,
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -69,7 +77,7 @@ class OnboardingScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/splash.png'), // Ensure this path is correct and the image exists
+                Image.asset('assets/splash.jpg'), // Ensure this path is correct and the image exists
                 const SizedBox(height: 20),
                 const Text(
                   'Welcome to Digi Mess System',
