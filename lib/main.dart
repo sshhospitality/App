@@ -93,7 +93,7 @@ class OnboardingScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Login(title: 'Mess App')),
+                      MaterialPageRoute(builder: (context) => const Login(title: 'Digi Mess')),
                     );
                   },
                   child: const Text('Login'),
