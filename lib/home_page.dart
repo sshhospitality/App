@@ -56,13 +56,12 @@ class _HomePageState extends State<HomePage> {
       final String sessionCookie = await prefs.getString('token') ?? 'N/A';
       var cookie = 'token=$sessionCookie';
       final response = await http.post(
-        Uri.parse(
-            "https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/verify/details"),
-        headers:<String, String> {
-          "cookie": cookie,
-        },
-        body:{}
-      );
+          Uri.parse(
+              "https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/verify/details"),
+          headers: <String, String>{
+            "cookie": cookie,
+          },
+          body: {});
 
       final data = json.decode(response.body);
       print(sessionCookie);
@@ -160,57 +159,159 @@ class InfoTile extends StatelessWidget {
   }
 }
 
-class MealTimeline extends StatelessWidget {
-  final meals = [
-    {
-      'mealName': 'Breakfast',
-      'items': ['Bread', 'Butter', 'Eggs', 'Juice'],
-      'icon': Icons.breakfast_dining
-    },
-    {
-      'mealName': 'Lunch',
-      'items': ['Rice', 'Chicken', 'Vegetables', 'Salad'],
-      'icon': Icons.lunch_dining
-    },
-    {
-      'mealName': 'Snacks',
-      'items': ['Samosa', 'Tea', 'Biscuits'],
-      'icon': Icons.fastfood
-    },
-    {
-      'mealName': 'Dinner',
-      'items': ['Chapati', 'Dal', 'Paneer', 'Rice'],
-      'icon': Icons.dinner_dining
+class MealTimeline extends StatefulWidget {
+  @override
+  _MealTimelineState createState() => _MealTimelineState();
+}
+
+class _MealTimelineState extends State<MealTimeline> {
+  Map<String, List<dynamic>> meals = {
+    'Breakfast': [],
+    'Grace1_Lunch': [],
+    'Grace2_Lunch': [],
+    'Lunch': [],
+    'Snacks': [],
+    'Dinner': [],
+    'Grace_Dinner': [],
+  };
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMeals();
+  }
+
+  Future<void> fetchMeals() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String sessionCookie = prefs.getString('token') ?? 'N/A';
+    var cookie = 'token=$sessionCookie';
+    final response = await http.post(
+      Uri.parse(
+          'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/menu/list'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'cookie': cookie,
+      },
+      body: jsonEncode(<String, String>{}),
+    );
+
+    if (response.statusCode == 200) {
+      // final List<Map<String, String>> data = json.decode(response.body);
+      final List<dynamic> mealdata = json.decode(response.body);
+      final data = mealdata[0]['days'];
+      final today = DateTime.now();
+      final todayName = getDayName(today.weekday);
+      final todayMeals = data.firstWhere(
+        (day) => day['name'] == todayName,
+        orElse: () => [],
+      );
+
+      if (todayMeals != null) {
+        setState(() {
+          for (var meal in todayMeals['meals']) {
+            final mealType = meal['type'];
+            final items = meal['items'] ?? [];
+            final itemList = (items as List<dynamic>)
+                .map((item) => {
+                      'name': item['name'] ?? '',
+                      'category': item['category'] ?? '',
+                    })
+                .toList();
+            meals.putIfAbsent(mealType, () => []);
+            meals[mealType]!.addAll(itemList);
+          }
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } else {
+      throw Exception('Failed to load meals');
     }
-  ];
+  }
+
+  String getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return 'Monday';
+      case 2:
+        return 'Tuesday';
+      case 3:
+        return 'Wednesday';
+      case 4:
+        return 'Thursday';
+      case 5:
+        return 'Friday';
+      case 6:
+        return 'Saturday';
+      case 7:
+        return 'Sunday';
+      default:
+        return '';
+    }
+  }
+
+  IconData getMealIcon(String mealType) {
+    switch (mealType) {
+      case 'Breakfast':
+        return Icons.breakfast_dining;
+      case 'Lunch':
+        return Icons.lunch_dining;
+      case 'Grace1_Lunch':
+        return Icons.breakfast_dining;
+      case 'Grace2_Lunch':
+        return Icons.breakfast_dining;
+      case 'Snacks':
+        return Icons.fastfood;
+      case 'Dinner':
+        return Icons.breakfast_dining;
+      case 'Grace_Dinner':
+        return Icons.dinner_dining;
+      default:
+        return Icons.restaurant;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: meals.map((meal) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    return ListView(
+      children: meals.entries.map((entry) {
+        print(entry.value);
+        if (entry.value == []) return Container();
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Icon(meal['icon'] as IconData, size: 40),
+                Icon(getMealIcon(entry.key), size: 40),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        meal['mealName'] as String,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        entry.key,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8.0,
                         runSpacing: 4.0,
-                        children: (meal['items'] as List<String>).map((item) {
+                        children: entry.value.map((item) {
+                          final itemName = item['name'];
+                          print(item);
+                          print(itemName);
                           return Chip(
-                            label: Text(item),
+                            label: itemName != null ? Text(itemName) : Text(''),
                           );
                         }).toList(),
                       ),
