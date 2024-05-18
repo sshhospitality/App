@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'day_menu_screen.dart';
 
 class MenuPage extends StatelessWidget {
-  MenuPage({super.key});
+  MenuPage({Key? key});
 
   final List<String> days = [
     'Monday',
@@ -30,15 +30,8 @@ class MenuPage extends StatelessWidget {
           ),
           itemCount: days.length,
           itemBuilder: (context, index) {
-            return ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-                backgroundColor: Colors.teal, // Use backgroundColor instead of primary
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: () {
+            return GestureDetector(
+              onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -46,11 +39,19 @@ class MenuPage extends StatelessWidget {
                   ),
                 );
               },
-              child: Text(
-                days[index],
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey[900], // Changed button color
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: Text(
+                    days[index],
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             );

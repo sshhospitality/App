@@ -2,27 +2,28 @@ import 'package:flutter/material.dart';
 
 class DayMenuScreen extends StatelessWidget {
   final String day;
-  const DayMenuScreen({super.key, required this.day});
+  const DayMenuScreen({Key? key, required this.day}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Dummy data for each meal section
     final mealSections = {
       'Breakfast': [
-        {'image': 'assets/breakfast1.jpg', 'caption': 'Pancakes with syrup'},
-        {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
+        {'image': 'assets/breakfast_veg.jpg', 'caption': 'Pancakes with syrup', 'isVeg': true},
+        {'image': 'assets/breakfast_non_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': false},
+        {'image': 'assets/breakfast_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': true},
+        {'image': 'assets/breakfast_non_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': false},
       ],
       'Lunch': [
-        {'image': 'assets/lunch1.jpg', 'caption': 'Grilled chicken with salad'},
-        {'image': 'assets/lunch1.jpg', 'caption': 'Vegetable pasta'},
+        {'image': 'assets/lunch_veg.jpg', 'caption': 'Grilled chicken with salad', 'isVeg': false},
+        {'image': 'assets/lunch_veg.jpg', 'caption': 'Vegetable pasta', 'isVeg': true},
       ],
       'Snacks': [
-        {'image': 'assets/snacks1.jpg', 'caption': 'Fruit smoothie'},
-        {'image': 'assets/snacks1.jpg', 'caption': 'Granola bar'},
+        {'image': 'assets/snacks_veg.jpg', 'caption': 'Fruit smoothie', 'isVeg': true},
+        {'image': 'assets/snacks_veg.jpg', 'caption': 'Granola bar', 'isVeg': true},
       ],
       'Dinner': [
-        {'image': 'assets/dinner1.jpg', 'caption': 'Steak with mashed potatoes'},
-        {'image': 'assets/dinner1.jpg', 'caption': 'Vegetable stir-fry'},
+        {'image': 'assets/dinner_non_veg.jpg', 'caption': 'Steak with mashed potatoes', 'isVeg': false},
+        {'image': 'assets/dinner_veg.jpg', 'caption': 'Vegetable stir-fry', 'isVeg': true},
       ],
     };
 
@@ -37,41 +38,80 @@ class DayMenuScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.shade100,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   mealType,
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                 ),
               ),
-              const SizedBox(height: 10),
-              ...items.map((item) {
-                return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 5,
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(8.0),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        item['image']!,
-                        height: 80,
-                        width: 80,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    title: Text(
-                      item['caption']!,
-                      style: const TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
+              SizedBox(
+                height: 200,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: items.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: SizedBox(
+                          width: 160,
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 5,
+                              child: Stack(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                          child: Image.asset(
+                                            item['image'] as String, // Cast to String
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          item['caption'] as String, // Cast to String
+                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: item['isVeg'] as bool ? Colors.green : Colors.red, // Cast to bool
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(8),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        item['isVeg'] as bool ? Icons.eco : Icons.auto_awesome, // Cast to bool
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
+                ),
+              ),
               const SizedBox(height: 20), // Add some space between sections
             ],
           );
