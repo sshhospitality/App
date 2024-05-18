@@ -8,22 +8,22 @@ class DayMenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mealSections = {
       'Breakfast': [
-        {'image': 'assets/breakfast1.jpg', 'caption': 'Pancakes with syrup'},
-        {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
-        {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
-        {'image': 'assets/breakfast1.jpg', 'caption': 'Omelette with veggies'},
+        {'image': 'assets/breakfast_veg.jpg', 'caption': 'Pancakes with syrup', 'isVeg': true},
+        {'image': 'assets/breakfast_non_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': false},
+        {'image': 'assets/breakfast_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': true},
+        {'image': 'assets/breakfast_non_veg.jpg', 'caption': 'Omelette with veggies', 'isVeg': false},
       ],
       'Lunch': [
-        {'image': 'assets/lunch1.jpg', 'caption': 'Grilled chicken with salad'},
-        {'image': 'assets/lunch1.jpg', 'caption': 'Vegetable pasta'},
+        {'image': 'assets/lunch_veg.jpg', 'caption': 'Grilled chicken with salad', 'isVeg': false},
+        {'image': 'assets/lunch_veg.jpg', 'caption': 'Vegetable pasta', 'isVeg': true},
       ],
       'Snacks': [
-        {'image': 'assets/snacks1.jpg', 'caption': 'Fruit smoothie'},
-        {'image': 'assets/snacks1.jpg', 'caption': 'Granola bar'},
+        {'image': 'assets/snacks_veg.jpg', 'caption': 'Fruit smoothie', 'isVeg': true},
+        {'image': 'assets/snacks_veg.jpg', 'caption': 'Granola bar', 'isVeg': true},
       ],
       'Dinner': [
-        {'image': 'assets/dinner1.jpg', 'caption': 'Steak with mashed potatoes'},
-        {'image': 'assets/dinner1.jpg', 'caption': 'Vegetable stir-fry'},
+        {'image': 'assets/dinner_non_veg.jpg', 'caption': 'Steak with mashed potatoes', 'isVeg': false},
+        {'image': 'assets/dinner_veg.jpg', 'caption': 'Vegetable stir-fry', 'isVeg': true},
       ],
     };
 
@@ -46,7 +46,7 @@ class DayMenuScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: 180,
+                height: 200,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -55,29 +55,55 @@ class DayMenuScreen extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 10),
                         child: SizedBox(
                           width: 160,
-                          child: Card(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 5,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                                  child: Image.asset(
-                                    item['image']!,
-                                    height: 100,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 5,
+                              child: Stack(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                          child: Image.asset(
+                                            item['image'] as String, // Cast to String
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          item['caption'] as String, // Cast to String
+                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    item['caption']!,
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: item['isVeg'] as bool ? Colors.green : Colors.red, // Cast to bool
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(8),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        item['isVeg'] as bool ? Icons.eco : Icons.auto_awesome, // Cast to bool
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
