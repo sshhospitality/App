@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:timelines/timelines.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,10 +16,8 @@ class _HomePageState extends State<HomePage> {
   late String userName = '';
   late String college = '';
   late String idNumber = '';
-  late String upcomingMeal = '';
   late String mealsCompleted = '';
   late String meal = "";
-  bool _isPollVisible = false;
   List<Map<String, dynamic>> _polls = [];
 
   @override
@@ -173,7 +172,7 @@ class InfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      color: Colors.lightBlue[50], // Light color for better UI
+      color: Colors.lightBlue[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -195,13 +194,183 @@ class InfoTile extends StatelessWidget {
   }
 }
 
+// class MealTimeline extends StatefulWidget {
+//   @override
+//   _MealTimelineState createState() => _MealTimelineState();
+// }
+
+// class _MealTimelineState extends State<MealTimeline> {
+//   Map<String, List<String>> meals = {
+//     'Breakfast': [],
+//     'Grace1_Lunch': [],
+//     'Grace2_Lunch': [],
+//     'Lunch': [],
+//     'Snacks': [],
+//     'Dinner': [],
+//     'Grace_Dinner': [],
+//   };
+//   bool isLoading = true;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     fetchMeals();
+//   }
+
+//   Future<void> fetchMeals() async {
+//     final SharedPreferences prefs = await SharedPreferences.getInstance();
+//     final String sessionCookie = prefs.getString('token') ?? 'N/A';
+//     var cookie = 'token=$sessionCookie';
+//     final response = await http.post(
+//       Uri.parse(
+//           'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/menu/list'),
+//       headers: <String, String>{
+//         'Content-Type': 'application/json; charset=UTF-8',
+//         'cookie': cookie,
+//       },
+//       body: jsonEncode(<String, String>{}),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final List<dynamic> mealdata = json.decode(response.body);
+//       final data = mealdata[0]['days'];
+//       final today = DateTime.now();
+//       final todayName = getDayName(today.weekday);
+//       final todayMeals = data.firstWhere(
+//         (day) => day['name'] == todayName,
+//         orElse: () => [],
+//       );
+
+//       if (todayMeals != null) {
+//         setState(() {
+//           for (var meal in todayMeals['meals']) {
+//             final mealType = meal['type'];
+//             final items = meal['items'] ?? [];
+//             final itemList = (items as List<dynamic>)
+//                 .map((item) => item['name'] ?? '')
+//                 .toList();
+//             meals.putIfAbsent(mealType, () => []);
+//             meals[mealType]!.addAll(itemList);
+//           }
+//           isLoading = false;
+//         });
+//       } else {
+//         setState(() {
+//           isLoading = false;
+//         });
+//       }
+//     } else {
+//       throw Exception('Failed to load meals');
+//     }
+//   }
+
+//   String getDayName(int weekday) {
+//     switch (weekday) {
+//       case 1:
+//         return 'Monday';
+//       case 2:
+//         return 'Tuesday';
+//       case 3:
+//         return 'Wednesday';
+//       case 4:
+//         return 'Thursday';
+//       case 5:
+//         return 'Friday';
+//       case 6:
+//         return 'Saturday';
+//       case 7:
+//         return 'Sunday';
+//       default:
+//         return '';
+//     }
+//   }
+
+//   IconData getMealIcon(String mealType) {
+//     switch (mealType) {
+//       case 'Breakfast':
+//         return Icons.breakfast_dining;
+//       case 'Lunch':
+//         return Icons.lunch_dining;
+//       case 'Snacks':
+//         return Icons.fastfood;
+//       case 'Dinner':
+//         return Icons.dinner_dining;
+//       default:
+//         return Icons.restaurant;
+//     }
+//   }
+
+//   Color getMealColor(String mealType) {
+//     switch (mealType) {
+//       case 'Breakfast':
+//         return Colors.blue[300]!;
+//       case 'Lunch':
+//         return Colors.green[300]!;
+//       case 'Snacks':
+//         return Colors.orange[300]!;
+//       case 'Dinner':
+//         return Colors.red[300]!;
+//       default:
+//         return Colors.grey[300]!;
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return isLoading
+//         ? const CircularProgressIndicator()
+//         : FixedTimeline.tileBuilder(
+//             builder: TimelineTileBuilder.connected(
+//               connectionDirection: ConnectionDirection.before,
+//               itemCount: meals.keys.length,
+//               contentsBuilder: (context, index) {
+//                 final mealType = meals.keys.elementAt(index);
+//                 final mealItems = meals[mealType]!;
+//                 return Padding(
+//                   padding: const EdgeInsets.all(12.0),
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         mealType,
+//                         style: TextStyle(
+//                           fontSize: 18,
+//                           fontWeight: FontWeight.bold,
+//                           color: getMealColor(mealType),
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Text(
+//                         mealItems.join(', '),
+//                         style: const TextStyle(fontSize: 14),
+//                       ),
+//                     ],
+//                   ),
+//                 );
+//               },
+//               indicatorBuilder: (_, index) {
+//                 final mealType = meals.keys.elementAt(index);
+//                 return DotIndicator(
+//                   color: getMealColor(mealType),
+//                   child: Icon(
+//                     getMealIcon(mealType),
+//                     color: Colors.white,
+//                     size: 20,
+//                   ),
+//                 );
+//               },
+//               connectorBuilder: (_, index, __) => const SolidLineConnector(),
+//             ),
+//           );
+//   }
+// }
 class MealTimeline extends StatefulWidget {
   @override
   _MealTimelineState createState() => _MealTimelineState();
 }
 
 class _MealTimelineState extends State<MealTimeline> {
-  Map<String, List<dynamic>> meals = {
+  Map<String, List<String>> meals = {
     'Breakfast': [],
     'Grace1_Lunch': [],
     'Grace2_Lunch': [],
@@ -248,10 +417,7 @@ class _MealTimelineState extends State<MealTimeline> {
             final mealType = meal['type'];
             final items = meal['items'] ?? [];
             final itemList = (items as List<dynamic>)
-                .map((item) => {
-                      'name': item['name'] ?? '',
-                      'category': item['category'] ?? '',
-                    })
+                .map<String>((item) => item['name'] as String)
                 .toList();
             meals.putIfAbsent(mealType, () => []);
             meals[mealType]!.addAll(itemList);
@@ -323,52 +489,52 @@ class _MealTimelineState extends State<MealTimeline> {
   Widget build(BuildContext context) {
     return isLoading
         ? const CircularProgressIndicator()
-        : Column(
-            children: meals.entries.map((entry) {
-              final mealType = entry.key;
-              final mealItems = entry.value;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    leading: Icon(
-                      getMealIcon(mealType),
-                      color: getMealColor(mealType),
-                    ),
-                    title: Text(
-                      mealType,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+        : FixedTimeline.tileBuilder(
+            builder: TimelineTileBuilder.connected(
+              connectionDirection: ConnectionDirection.before,
+              itemCount: meals.keys.length,
+              contentsBuilder: (context, index) {
+                final mealType = meals.keys.elementAt(index);
+                final mealItems = meals[mealType]!;
+                return Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        mealType,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: getMealColor(mealType),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        mealItems.join(', '),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
                   ),
-                  const Divider(),
-                  Column(
-                    children: mealItems.map<Widget>((item) {
-                      final itemName = item['name'];
-                      final itemCategory = item['category'];
-                      return ListTile(
-                        title: Text(
-                          itemName,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        subtitle: Text(
-                          itemCategory,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                );
+              },
+              indicatorBuilder: (_, index) {
+                final mealType = meals.keys.elementAt(index);
+                return DotIndicator(
+                  color: getMealColor(mealType),
+                  child: Icon(
+                    getMealIcon(mealType),
+                    color: Colors.white,
+                    size: 20,
                   ),
-                ],
-              );
-            }).toList(),
+                );
+              },
+              connectorBuilder: (_, index, __) => const SolidLineConnector(),
+            ),
           );
   }
 }
+
 
 class PieChartSection extends StatelessWidget {
   @override
@@ -388,7 +554,7 @@ class PieChartSection extends StatelessWidget {
     ];
 
     return Card(
-      color: Colors.lightBlue[50], // Light color for better UI
+      color: Colors.lightBlue[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -473,7 +639,7 @@ class PollItem extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
-      color: Colors.lightBlue[50], // Light color for better UI
+      color: Colors.lightBlue[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
