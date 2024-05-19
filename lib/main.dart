@@ -6,6 +6,8 @@ import 'dart:convert'; // For JSON encoding/decoding
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:lottie/lottie.dart';
+
 
 void main() {
   // Set the background color of the notification bar to white
@@ -54,75 +56,96 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.deepPurple, Colors.purple],
+     return Scaffold(
+      body: Container(
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.deepPurple.withOpacity(0.8), // Darker shade of purple
+        Colors.purple.withOpacity(0.6), // Lighter shade of purple
+      ],
+    ),
+  ),
+  padding: const EdgeInsets.symmetric(horizontal: 24.0), // Add horizontal padding
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start, // Align contents to the left
+    children: [
+      const SizedBox(height: 100), // Add space from top
+      // Lottie animation
+      Lottie.asset(
+        'assets/onboarding.json',
+        height: 300,
+        width: 300,
+      ),
+      const SizedBox(height: 24), // Space between the animation and the text
+      // First text
+      const Text(
+        'Welcome to Digi Mess System',
+        style: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: Colors.deepPurple, // Text color set to white for better contrast
+        ),
+      ),
+      const SizedBox(height: 8), // Add a small gap
+      // Second text
+      const Text(
+        'Experience the convenience of managing your meals digitally.',
+        style: TextStyle(
+          fontSize: 18,
+          color: Colors.white, // Text color set to white for better contrast
+        ),
+      ),
+      const SizedBox(height: 30), // Space between the text and the button
+      // Login button
+      Padding(
+        padding: const EdgeInsets.fromLTRB(2, 8, 8, 16.0), // Adjust left padding for left alignment
+        child: Align(
+          alignment: Alignment.centerLeft, // Align the button to the left
+          child: ElevatedButton(
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                const EdgeInsets.symmetric(horizontal: 64, vertical: 16),
+              ),
+              backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Login(title: 'Digi Mess')),
+              );
+            },
+            child: const Text(
+              'Login',
+              style: TextStyle(
+                color: Colors.white, // Set text color to white
+                fontWeight: FontWeight.bold, // Make text bold
               ),
             ),
           ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(), // Add space above the content
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-                  child: Image.asset('assets/splash.jpg'), // Ensure this path is correct and the image exists
-                ),
-                const Text(
-                  'Welcome to Digi Mess System',
-                  style: TextStyle(
-                    fontSize: 24, // You can adjust the font size as needed
-                    fontWeight: FontWeight.bold, // Makes the text bold
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10), // Space between the texts
-                const Text(
-                  'Purity and Harmony in Every Meal',
-                  style: TextStyle(
-                    fontSize: 18, // Adjust font size as needed
-                    fontStyle: FontStyle.italic, // Makes the text italic
-                    color: Colors.white,
-                  ),
-                ),
-                const Spacer(), // Add space below the text
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      textStyle: const TextStyle(fontSize: 20),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Login(title: 'Digi Mess')),
-                      );
-                    },
-                    child: const Text('Login'),
-                  ),
-                ),
-                const SizedBox(height: 100), // Additional spacing below the button
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
+    ],
+  ),
+),
+
     );
   }
 }
+
 
 class Login extends StatefulWidget {
   const Login({super.key, required this.title});

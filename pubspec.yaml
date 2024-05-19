@@ -26,6 +26,7 @@ dependencies:
   animated_splash_screen: ^1.1.0
   timelines: ^0.1.0
   timeago: ^3.6.1
+  lottie: ^3.1.2
 
 
 flutter_native_splash:
@@ -59,5 +60,6 @@ flutter:
     - assets/snacks_veg.jpg
     # - assets/snacks2.jpg
     - assets/dinner_veg.jpg
+    - assets/onboarding.json
     # - assets/dinner2.jpg
   uses-material-design: true
