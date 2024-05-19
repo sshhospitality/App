@@ -21,7 +21,6 @@ class _MainHomePageState extends State<MainHomePage> {
   int _selectedIndex = 0;
   bool _isNotificationVisible = false;
   bool _isPageLoading = false;
-  List<Map<String, String>> _notifications = [];
 
   final List<Widget> _widgetOptions = <Widget>[
     const HomePage(),
@@ -42,10 +41,9 @@ class _MainHomePageState extends State<MainHomePage> {
   @override
   void initState() {
     super.initState();
-    fetchNotifications();
   }
 
-  Future<void> fetchNotifications() async {
+  Future<List<Map<String, String>>> fetchNotifications() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String sessionCookie = prefs.getString('token') ?? 'N/A';
@@ -61,26 +59,24 @@ class _MainHomePageState extends State<MainHomePage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = json.decode(response.body);
-        setState(() {
-          _notifications =
-              responseData.map<Map<String, String>>((notification) {
-            return {
-              'title': notification['title'] ?? 'No title',
-              'description': notification['message'] ?? 'No description',
-              'createdAt': notification['createdAt'] ?? 'No date',
-            };
-          }).toList();
-        });
+        return responseData.map<Map<String, String>>((notification) {
+          return {
+            'title': notification['title'] ?? 'No title',
+            'description': notification['message'] ?? 'No description',
+            'createdAt': notification['createdAt'] ?? 'No date',
+          };
+        }).toList();
       } else {
         throw Exception('Failed to load notifications');
       }
     } catch (e) {
       print('Error fetching notifications: $e');
       // Handle the error appropriately in your app (e.g., show a dialog or a snackbar)
+      return [];
     }
   }
 
-void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _isPageLoading = true;
       _selectedIndex = index;
@@ -92,6 +88,7 @@ void _onItemTapped(int index) {
       });
     });
   }
+
   void _toggleNotificationVisibility() {
     setState(() {
       _isNotificationVisible = !_isNotificationVisible;
@@ -114,99 +111,131 @@ void _onItemTapped(int index) {
       body: _isPageLoading
           ? const Center(child: ShimmerLoading())
           : Stack(
-        children: [
-          _widgetOptions[_selectedIndex],
-          if (_isNotificationVisible)
-            Positioned(
-  top: 0,
-  right: 0,
-  child: Container(
-    width: MediaQuery.of(context).size.width * 0.6,
-    height: 200,
-    decoration: BoxDecoration(
-      // color: Color.fromARGB(255, 209, 185, 247),
-      color: Color.fromARGB(255, 255, 255, 255),
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.5),
-          spreadRadius: 5,
-          blurRadius: 7,
-          offset: Offset(0, 3),
-        ),
-      ],
-
-
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-        ),
-        Expanded(
-          child: ListView.separated(
-            itemCount: _notifications.length,
-            separatorBuilder: (BuildContext context, int index) => const Divider(
-              color: Colors.grey,
-              height: 1,
-            ),
-            itemBuilder: (context, index) {
-              final notification = _notifications[index];
-              final createdAtString = notification['createdAt'];
-              DateTime createdAt;
-              if (createdAtString != null) {
-                          createdAt = DateTime.parse(createdAtString);
-                        } else {
-                          createdAt = DateTime.now(); // Fallback date if null
-                        }
-
-                        final timeAgo = timeago.format(createdAt);
-                        print(timeAgo);
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.notification_important, // Replace with your desired icon
-                      color: Colors.black,
-                    ),
-                    SizedBox(width: 8.0), // Space between icon and text
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            notification['title'] ?? 'No title',
-                            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            notification['description'] ?? 'No description',
-                            style: TextStyle(color: Colors.black87),
-                          ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            timeAgo,
-                            style: TextStyle(color: Colors.black54),
+              children: [
+                _widgetOptions[_selectedIndex],
+                if (_isNotificationVisible)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(0, 3),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    ),
-  ),
-),
+                      child: FutureBuilder<List<Map<String, String>>>(
+                        future: fetchNotifications(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                                child: Text('No notifications'));
+                          } else {
+                            final notifications = snapshot.data!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                ),
+                                Expanded(
+                                  child: ListView.separated(
+                                    itemCount: notifications.length,
+                                    separatorBuilder:
+                                        (BuildContext context, int index) =>
+                                            const Divider(
+                                      color: Colors.grey,
+                                      height: 1,
+                                    ),
+                                    itemBuilder: (context, index) {
+                                      final notification = notifications[index];
+                                      final createdAtString =
+                                          notification['createdAt'];
+                                      DateTime createdAt;
+                                      if (createdAtString != null) {
+                                        createdAt =
+                                            DateTime.parse(createdAtString);
+                                      } else {
+                                        createdAt = DateTime
+                                            .now(); // Fallback date if null
+                                      }
 
-        ],
-      ),
+                                      final timeAgo = timeago.format(createdAt);
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              Icons
+                                                  .notification_important, // Replace with your desired icon
+                                              color: Colors.black,
+                                            ),
+                                            SizedBox(
+                                                width:
+                                                    8.0), // Space between icon and text
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    notification['title'] ??
+                                                        'No title',
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  SizedBox(height: 4.0),
+                                                  Text(
+                                                    notification[
+                                                            'description'] ??
+                                                        'No description',
+                                                    style: TextStyle(
+                                                        color: Colors.black87),
+                                                  ),
+                                                  SizedBox(height: 4.0),
+                                                  Text(
+                                                    timeAgo,
+                                                    style: TextStyle(
+                                                        color: Colors.black54),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+              ],
+            ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -239,187 +268,3 @@ void _onItemTapped(int index) {
     );
   }
 }
-// _widgetOptions[_selectedIndex],
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: const <BottomNavigationBarItem>[
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.home),
-//             label: 'Home',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.feedback),
-//             label: 'Feedback',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.qr_code),
-//             label: 'QR',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.menu),
-//             label: 'Menu',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.person),
-//             label: 'Profile',
-//           ),
-//         ],
-//         currentIndex: _selectedIndex,
-//         selectedItemColor: Colors.deepPurple,
-//         unselectedItemColor: Colors.grey,
-//         showUnselectedLabels: true,
-//         onTap: _onItemTapped,
-//       ),
-//     );
-//   }
-// }
-//   void _onItemTapped(int index) {
-//     setState(() {
-//       _selectedIndex = index;
-//     });
-//   }
-
-//   void _toggleNotificationVisibility() {
-//     setState(() {
-//       _isNotificationVisible = !_isNotificationVisible;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(_appBarTitles[_selectedIndex]),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.notifications, color: Colors.white),
-//             onPressed: _toggleNotificationVisibility,
-//           ),
-//         ],
-//         leading: SizedBox(width: 5),
-//       ),
-//       body: Stack(
-//         children: [
-//           _widgetOptions[_selectedIndex],
-//           if (_isNotificationVisible)
-//             Positioned(
-//   top: 0,
-//   right: 0,
-//   child: Container(
-//     width: MediaQuery.of(context).size.width * 0.6,
-//     height: 200,
-//     decoration: BoxDecoration(
-//       // color: Color.fromARGB(255, 209, 185, 247),
-//       color: Color.fromARGB(255, 255, 255, 255),
-//       borderRadius: BorderRadius.circular(10),
-//       boxShadow: [
-//         BoxShadow(
-//           color: Colors.grey.withOpacity(0.5),
-//           spreadRadius: 5,
-//           blurRadius: 7,
-//           offset: Offset(0, 3),
-//         ),
-//       ],
-
-
-//     ),
-//     child: Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//         ),
-//         Expanded(
-//           child: ListView.separated(
-//             itemCount: _notifications.length,
-//             separatorBuilder: (BuildContext context, int index) => const Divider(
-//               color: Colors.grey,
-//               height: 1,
-//             ),
-//             itemBuilder: (context, index) {
-//               final notification = _notifications[index];
-//               final createdAtString = notification['createdAt'];
-//               DateTime createdAt;
-//               if (createdAtString != null) {
-//                           createdAt = DateTime.parse(createdAtString);
-//                         } else {
-//                           createdAt = DateTime.now(); // Fallback date if null
-//                         }
-
-//                         final timeAgo = timeago.format(createdAt);
-//                         print(timeAgo);
-//               return Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Row(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Icon(
-//                       Icons.notification_important, // Replace with your desired icon
-//                       color: Colors.black,
-//                     ),
-//                     SizedBox(width: 8.0), // Space between icon and text
-//                     Expanded(
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           Text(
-//                             notification['title'] ?? 'No title',
-//                             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-//                           ),
-//                           SizedBox(height: 4.0),
-//                           Text(
-//                             notification['description'] ?? 'No description',
-//                             style: TextStyle(color: Colors.black87),
-//                           ),
-//                           SizedBox(height: 4.0),
-//                           Text(
-//                             timeAgo,
-//                             style: TextStyle(color: Colors.black54),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               );
-//             },
-//           ),
-//         ),
-//       ],
-//     ),
-//   ),
-// ),
-
-//         ],
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: const [
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.home),
-//             label: 'Home',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.feedback),
-//             label: 'Feedback',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.qr_code),
-//             label: 'QR',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.restaurant_menu),
-//             label: 'Menu',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.person),
-//             label: 'Profile',
-//           ),
-//         ],
-//         currentIndex: _selectedIndex,
-//         selectedItemColor: Colors.deepPurple,
-//         unselectedItemColor: Colors.grey,
-//         showUnselectedLabels: true,
-//         onTap: _onItemTapped,
-//       ),
-//     );
-//   }
-// }

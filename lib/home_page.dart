@@ -19,13 +19,21 @@ class _HomePageState extends State<HomePage> {
   late String mealsCompleted = '';
   late String meal = "";
   List<Map<String, dynamic>> _polls = [];
+  late Future<void> _initialLoad;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    // fetchData();
+    // determineMeal();
+    // fetchPolls();
+    _initialLoad = _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await fetchData();
     determineMeal();
-    fetchPolls();
+    await fetchPolls();
   }
 
   void determineMeal() {
@@ -115,60 +123,95 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome!!!',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+    return FutureBuilder(
+      future: _initialLoad,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome!!!',
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '$userName',
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple),
+                  ),
+                  const SizedBox(height: 16),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      InfoTile(
+                          title: 'College',
+                          content: college,
+                          icon: Icons.school),
+                      InfoTile(
+                          title: 'ID Number',
+                          content: idNumber,
+                          icon: Icons.badge),
+                      InfoTile(
+                          title: 'Upcoming Meal',
+                          content: meal,
+                          icon: Icons.fastfood),
+                      InfoTile(
+                          title: 'Transactions Today',
+                          content: mealsCompleted,
+                          icon: Icons.attach_money),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Meal Timeline',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple),
+                  ),
+                  const SizedBox(height: 10),
+                  MealTimeline(),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Dining Chart for this month',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple),
+                  ),
+                  const SizedBox(height: 20),
+                  PieChartSection(),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Polls',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple),
+                  ),
+                  PollSection(
+                    polls: _polls,
+                    onPollSubmitted: () {
+                      fetchPolls(); // Call fetchPolls when a poll is submitted
+                    },
+                  ),
+                ],
+              ),
             ),
-            Text(
-              '$userName',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,color: Colors.deepPurple),
-            ),
-            const SizedBox(height: 16),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                InfoTile(title: 'College', content: college, icon: Icons.school),
-InfoTile(title: 'ID Number', content: idNumber, icon: Icons.badge),
-InfoTile(title: 'Upcoming Meal', content: meal, icon: Icons.fastfood),
-InfoTile(title: 'Transactions Today', content: mealsCompleted, icon: Icons.attach_money),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Meal Timeline',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color:Colors.deepPurple),
-            ),
-            const SizedBox(height: 10),
-            MealTimeline(),
-            const SizedBox(height: 24),
-            Text(
-              'Dining Chart for this month',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: Colors.deepPurple),
-            ),
-            const SizedBox(height: 20),
-            PieChartSection(),
-            const SizedBox(height: 20),
-            Text(
-              'Polls',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,color: Colors.deepPurple),
-            ),
-            PollSection(
-              polls: _polls,
-              onPollSubmitted: () {
-                fetchPolls(); // Call fetchPolls when a poll is submitted
-              },
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+      },
     );
   }
 }
@@ -199,7 +242,8 @@ class InfoTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -269,7 +313,7 @@ class _MealTimelineState extends State<MealTimeline> {
       final todayMeals = data.firstWhere(
         (day) => day['name'] == todayName,
         orElse: () => [],
-      );  
+      );
 
       if (todayMeals != null) {
         setState(() {
@@ -284,7 +328,7 @@ class _MealTimelineState extends State<MealTimeline> {
           }
           isLoading = false;
         });
-      } else if(todayMeals == []){
+      } else if (todayMeals == []) {
         setState(() {
           isLoading = false;
         });
@@ -407,7 +451,6 @@ class _MealTimelineState extends State<MealTimeline> {
   }
 }
 
-
 class PieChartSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -476,11 +519,9 @@ class PollSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (polls.isEmpty) {
-      return const Column(
-      children: [
+      return const Column(children: [
         Text('No polls available'),
-      ]
-      );
+      ]);
     }
 
     return Column(
@@ -594,6 +635,7 @@ class PollItem extends StatelessWidget {
     }
   }
 }
+
 class NotificationsDropdown extends StatelessWidget {
   final List<String> notifications;
 
