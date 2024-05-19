@@ -203,25 +203,28 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Center(
-                child: _image == null
-                    ? ElevatedButton(
-                        onPressed: _pickImage,
-                        child: const Text('Choose Image'),
-                      )
-                    : Column(
-                        children: [
-                          Image.file(
-                            _image!,
-                            height: 150,
-                          ),
-                          TextButton(
-                            onPressed: _pickImage,
-                            child: const Text('Change Image'),
-                          ),
-                        ],
-                      ),
-              ),
+Align(
+  alignment: Alignment.topLeft,
+  child: _image == null
+      ? ElevatedButton(
+          onPressed: _pickImage,
+          child: const Text('Choose Image'),
+        )
+      : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.file(
+              _image!,
+              height: 150,
+            ),
+            TextButton(
+              onPressed: _pickImage,
+              child: const Text('Change Image'),
+            ),
+          ],
+        ),
+),
+
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: submitFeedback,

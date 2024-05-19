@@ -7,6 +7,7 @@ import 'profile_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:timeago/timeago.dart' as timeago;
 
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
@@ -58,6 +59,7 @@ class _MainHomePageState extends State<MainHomePage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = json.decode(response.body);
+        print(responseData);
         setState(() {
           _notifications =
               responseData.map<Map<String, String>>((notification) {
@@ -107,57 +109,93 @@ class _MainHomePageState extends State<MainHomePage> {
           _widgetOptions[_selectedIndex],
           if (_isNotificationVisible)
             Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.6,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 209, 185, 247),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
+  top: 0,
+  right: 0,
+  child: Container(
+    width: MediaQuery.of(context).size.width * 0.6,
+    height: 200,
+    decoration: BoxDecoration(
+      // color: Color.fromARGB(255, 209, 185, 247),
+      color: Color.fromARGB(255, 255, 255, 255),
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 5,
+          blurRadius: 7,
+          offset: Offset(0, 3),
+        ),
+      ],
+
+
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+        ),
+        Expanded(
+          child: ListView.separated(
+            itemCount: _notifications.length,
+            separatorBuilder: (BuildContext context, int index) => const Divider(
+              color: Colors.grey,
+              height: 1,
+            ),
+            itemBuilder: (context, index) {
+              final notification = _notifications[index];
+              final createdAtString = notification['createdAt'];
+              DateTime createdAt;
+              if (createdAtString != null) {
+                          createdAt = DateTime.parse(createdAtString);
+                        } else {
+                          createdAt = DateTime.now(); // Fallback date if null
+                        }
+
+                        final timeAgo = timeago.format(createdAt);
+                        print(timeAgo);
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    Icon(
+                      Icons.notification_important, // Replace with your desired icon
+                      color: Colors.black,
                     ),
+                    SizedBox(width: 8.0), // Space between icon and text
                     Expanded(
-                      child: ListView.separated(
-                          itemCount: _notifications.length,
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const Divider(
-                                color: Colors.grey,
-                                height: 1,
-                              ),
-                          itemBuilder: (context, index) {
-                            final notification = _notifications[index];
-                            return ListTile(
-                              title: Text(
-                                notification['title'] ?? 'No title',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    notification['description'] ??
-                                        'No description',
-                                    style: TextStyle(color: Colors.black87),
-                                  ),
-                                  Text(
-                                    notification['createdAt'] ?? 'No date',
-                                    style: TextStyle(color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            notification['title'] ?? 'No title',
+                            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            notification['description'] ?? 'No description',
+                            style: TextStyle(color: Colors.black87),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            timeAgo,
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ),
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
