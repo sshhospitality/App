@@ -8,6 +8,7 @@ import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:lottie/lottie.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 void main() {
   // Set the background color of the notification bar to white
@@ -65,6 +66,7 @@ class OnboardingScreen extends StatelessWidget {
      return Scaffold(
       body: Container(
   decoration: BoxDecoration(
+    color: Color.fromARGB(255, 216, 204, 238),
     gradient: LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -83,7 +85,7 @@ class OnboardingScreen extends StatelessWidget {
       Lottie.asset(
         'assets/onboarding.json',
         height: 300,
-        width: 300,
+        width: 500,
       ),
       const SizedBox(height: 24), // Space between the animation and the text
       // First text
@@ -92,7 +94,7 @@ class OnboardingScreen extends StatelessWidget {
         style: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.bold,
-          color: Colors.deepPurple, // Text color set to white for better contrast
+          color: Color.fromARGB(255, 49, 29, 84), // Text color set to white for better contrast
         ),
       ),
       const SizedBox(height: 8), // Add a small gap
@@ -104,12 +106,12 @@ class OnboardingScreen extends StatelessWidget {
           color: Colors.white, // Text color set to white for better contrast
         ),
       ),
-      const SizedBox(height: 30), // Space between the text and the button
+      const SizedBox(height: 50), // Space between the text and the button
       // Login button
       Padding(
         padding: const EdgeInsets.fromLTRB(2, 8, 8, 16.0), // Adjust left padding for left alignment
         child: Align(
-          alignment: Alignment.centerLeft, // Align the button to the left
+          alignment: Alignment.center, // Align the button to the center
           child: ElevatedButton(
             style: ButtonStyle(
               padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
@@ -132,7 +134,8 @@ class OnboardingScreen extends StatelessWidget {
               'Login',
               style: TextStyle(
                 color: Colors.white, // Set text color to white
-                fontWeight: FontWeight.bold, // Make text bold
+                fontWeight: FontWeight.bold,
+                fontSize: 15, // Make text bold
               ),
             ),
           ),

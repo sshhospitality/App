@@ -28,6 +28,7 @@ dependencies:
   timeago: ^3.6.1
   lottie: ^3.1.2
   animate_do: ^3.3.4
+  flutter_animate: ^1.0.0
 
 
 flutter_native_splash:
