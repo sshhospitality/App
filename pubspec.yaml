@@ -27,6 +27,7 @@ dependencies:
   timelines: ^0.1.0
   timeago: ^3.6.1
   lottie: ^3.1.2
+  animate_do: ^3.3.4
 
 
 flutter_native_splash:
@@ -58,6 +59,8 @@ flutter:
     - assets/lunch_veg.jpg
     # - assets/lunch2.jpg
     - assets/snacks_veg.jpg
+    - assets/background.png
+    - assets/background-2.png
     # - assets/snacks2.jpg
     - assets/dinner_veg.jpg
     - assets/onboarding.json

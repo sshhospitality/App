@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:animate_do/animate_do.dart';
 
 void main() {
   // Set the background color of the notification bar to white
@@ -204,76 +204,116 @@ class _LoginState extends State<Login> {
     await prefs.setString('token', responseBody['token']);
     await prefs.setString('_id', responseBody['user']['_id']);
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Form(
+@override
+Widget build(BuildContext context) {
+  final width = MediaQuery.of(context).size.width;
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: SingleChildScrollView(
+      child: Form(
         key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  'Login into Digi Mess',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurple),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: "Email",
-                    labelStyle: TextStyle(color: Colors.deepPurple),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.deepPurple),
-                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              height: 400,
+              child: Stack(
+                children: <Widget>[
+                  Positioned(
+                    top: -40,
+                    height: 400,
+                    width: width,
+                    child: FadeInUp(duration: Duration(seconds: 1), child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/background.png'),
+                          fit: BoxFit.fill
+                        )
+                      ),
+                    )),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                ),
+                  Positioned(
+                    height: 400,
+                    width: width+20,
+                    child: FadeInUp(duration: Duration(milliseconds: 1000), child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/background-2.png'),
+                          fit: BoxFit.fill
+                        )
+                      ),
+                    )),
+                  )
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextFormField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: "Password",
-                    labelStyle: TextStyle(color: Colors.deepPurple),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.deepPurple),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  FadeInUp(duration: Duration(milliseconds: 1500), child: Text("Login", style: TextStyle(color: Color.fromRGBO(49, 39, 79, 1), fontWeight: FontWeight.bold, fontSize: 30),)),
+                  SizedBox(height: 30,),
+                  FadeInUp(duration: Duration(milliseconds: 1700), child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                      border: Border.all(color: Color.fromRGBO(196, 135, 198, .3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromRGBO(196, 135, 198, .3),
+                          blurRadius: 20,
+                          offset: Offset(0, 10),
+                        )
+                      ]
                     ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
-                child: Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      textStyle: const TextStyle(fontSize: 20),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(
+                              color: Color.fromRGBO(196, 135, 198, .3)
+                            ))
+                          ),
+                          child: TextFormField(
+                            controller: emailController,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              labelText: "Email",
+                              labelStyle: TextStyle(color: Colors.grey)
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          child: TextFormField(
+                            controller: passwordController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              labelText: "Password",
+                              labelStyle: TextStyle(color: Colors.grey)
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              return null;
+                            },
+                          ),
+                        )
+                      ],
                     ),
+                  )),
+                  SizedBox(height: 40,),
+                  FadeInUp(duration: Duration(milliseconds: 1900), child: MaterialButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _login();
@@ -283,14 +323,23 @@ class _LoginState extends State<Login> {
                         );
                       }
                     },
-                    child: const Text('Submit'),
-                  ),
-                ),
+                    color: Color.fromRGBO(49, 39, 79, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    height: 50,
+                    child: Center(
+                      child: Text("Login", style: TextStyle(color: Colors.white),),
+                    ),
+                  )),
+                ],
               ),
-            ],
-          ),
+            )
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
