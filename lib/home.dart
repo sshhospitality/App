@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:timeago/timeago.dart' as timeago;
+import 'shimmer.dart';
 
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
@@ -19,6 +20,7 @@ class MainHomePage extends StatefulWidget {
 class _MainHomePageState extends State<MainHomePage> {
   int _selectedIndex = 0;
   bool _isNotificationVisible = false;
+  bool _isPageLoading = false;
   List<Map<String, String>> _notifications = [];
 
   final List<Widget> _widgetOptions = <Widget>[
@@ -78,12 +80,18 @@ class _MainHomePageState extends State<MainHomePage> {
     }
   }
 
-  void _onItemTapped(int index) {
+void _onItemTapped(int index) {
     setState(() {
+      _isPageLoading = true;
       _selectedIndex = index;
     });
-  }
 
+    Future.delayed(const Duration(seconds: 1), () {
+      setState(() {
+        _isPageLoading = false;
+      });
+    });
+  }
   void _toggleNotificationVisibility() {
     setState(() {
       _isNotificationVisible = !_isNotificationVisible;
@@ -103,7 +111,9 @@ class _MainHomePageState extends State<MainHomePage> {
         ],
         leading: SizedBox(width: 5),
       ),
-      body: Stack(
+      body: _isPageLoading
+          ? const Center(child: ShimmerLoading())
+          : Stack(
         children: [
           _widgetOptions[_selectedIndex],
           if (_isNotificationVisible)
@@ -229,3 +239,187 @@ class _MainHomePageState extends State<MainHomePage> {
     );
   }
 }
+// _widgetOptions[_selectedIndex],
+//       bottomNavigationBar: BottomNavigationBar(
+//         items: const <BottomNavigationBarItem>[
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.home),
+//             label: 'Home',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.feedback),
+//             label: 'Feedback',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.qr_code),
+//             label: 'QR',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.menu),
+//             label: 'Menu',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.person),
+//             label: 'Profile',
+//           ),
+//         ],
+//         currentIndex: _selectedIndex,
+//         selectedItemColor: Colors.deepPurple,
+//         unselectedItemColor: Colors.grey,
+//         showUnselectedLabels: true,
+//         onTap: _onItemTapped,
+//       ),
+//     );
+//   }
+// }
+//   void _onItemTapped(int index) {
+//     setState(() {
+//       _selectedIndex = index;
+//     });
+//   }
+
+//   void _toggleNotificationVisibility() {
+//     setState(() {
+//       _isNotificationVisible = !_isNotificationVisible;
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(_appBarTitles[_selectedIndex]),
+//         actions: [
+//           IconButton(
+//             icon: const Icon(Icons.notifications, color: Colors.white),
+//             onPressed: _toggleNotificationVisibility,
+//           ),
+//         ],
+//         leading: SizedBox(width: 5),
+//       ),
+//       body: Stack(
+//         children: [
+//           _widgetOptions[_selectedIndex],
+//           if (_isNotificationVisible)
+//             Positioned(
+//   top: 0,
+//   right: 0,
+//   child: Container(
+//     width: MediaQuery.of(context).size.width * 0.6,
+//     height: 200,
+//     decoration: BoxDecoration(
+//       // color: Color.fromARGB(255, 209, 185, 247),
+//       color: Color.fromARGB(255, 255, 255, 255),
+//       borderRadius: BorderRadius.circular(10),
+//       boxShadow: [
+//         BoxShadow(
+//           color: Colors.grey.withOpacity(0.5),
+//           spreadRadius: 5,
+//           blurRadius: 7,
+//           offset: Offset(0, 3),
+//         ),
+//       ],
+
+
+//     ),
+//     child: Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//         ),
+//         Expanded(
+//           child: ListView.separated(
+//             itemCount: _notifications.length,
+//             separatorBuilder: (BuildContext context, int index) => const Divider(
+//               color: Colors.grey,
+//               height: 1,
+//             ),
+//             itemBuilder: (context, index) {
+//               final notification = _notifications[index];
+//               final createdAtString = notification['createdAt'];
+//               DateTime createdAt;
+//               if (createdAtString != null) {
+//                           createdAt = DateTime.parse(createdAtString);
+//                         } else {
+//                           createdAt = DateTime.now(); // Fallback date if null
+//                         }
+
+//                         final timeAgo = timeago.format(createdAt);
+//                         print(timeAgo);
+//               return Padding(
+//                 padding: const EdgeInsets.all(8.0),
+//                 child: Row(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Icon(
+//                       Icons.notification_important, // Replace with your desired icon
+//                       color: Colors.black,
+//                     ),
+//                     SizedBox(width: 8.0), // Space between icon and text
+//                     Expanded(
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Text(
+//                             notification['title'] ?? 'No title',
+//                             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+//                           ),
+//                           SizedBox(height: 4.0),
+//                           Text(
+//                             notification['description'] ?? 'No description',
+//                             style: TextStyle(color: Colors.black87),
+//                           ),
+//                           SizedBox(height: 4.0),
+//                           Text(
+//                             timeAgo,
+//                             style: TextStyle(color: Colors.black54),
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//       ],
+//     ),
+//   ),
+// ),
+
+//         ],
+//       ),
+//       bottomNavigationBar: BottomNavigationBar(
+//         items: const [
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.home),
+//             label: 'Home',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.feedback),
+//             label: 'Feedback',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.qr_code),
+//             label: 'QR',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.restaurant_menu),
+//             label: 'Menu',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.person),
+//             label: 'Profile',
+//           ),
+//         ],
+//         currentIndex: _selectedIndex,
+//         selectedItemColor: Colors.deepPurple,
+//         unselectedItemColor: Colors.grey,
+//         showUnselectedLabels: true,
+//         onTap: _onItemTapped,
+//       ),
+//     );
+//   }
+// }
