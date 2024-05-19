@@ -59,7 +59,6 @@ class _MainHomePageState extends State<MainHomePage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = json.decode(response.body);
-        print(responseData);
         setState(() {
           _notifications =
               responseData.map<Map<String, String>>((notification) {

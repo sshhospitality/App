@@ -66,8 +66,6 @@ class _HomePageState extends State<HomePage> {
           body: {});
 
       final data = json.decode(response.body);
-      print(sessionCookie);
-      print(data);
       if (response.statusCode == 200) {
         await prefs.setString('name', data['userInfo']['name']);
         await prefs.setString('college', data['userInfo']['college']);
@@ -578,7 +576,6 @@ class PollItem extends StatelessWidget {
             'option': optionText,
           }),
         );
-        print(response.statusCode);
         if (response.statusCode == 200) {
           onPollSubmitted();
           // Handle successful response

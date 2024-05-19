@@ -57,8 +57,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
       _email = prefs.getString('email');
       _phoneNumber = prefs.getString('phone');
     });
-    print(_id);
-    print(prefs.getString('idnumber') ?? 'No ID');
   }
 
   @override

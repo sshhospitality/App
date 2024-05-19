@@ -65,8 +65,6 @@ class _QRPageState extends State<QRPage> {
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        print(cookie);
-        print(data);
         showAlertDialog(
             context,
             'Transaction Successful',
@@ -74,7 +72,6 @@ class _QRPageState extends State<QRPage> {
             data);
       } else {
         final data = json.decode(response.body);
-        print(data);
         showAlertDialog(
             context, 'Transaction Failed', data['message'] ?? 'Unknown error');
       }

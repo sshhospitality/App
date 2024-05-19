@@ -28,9 +28,6 @@ class _ProfilePageState extends State<ProfilePage> {
       college = prefs.getString('college') ?? 'N/A';
       email = prefs.getString('email') ?? 'N/A';
     });
-    print(name);
-    print(college);
-    print(email);
   }
 
   @override
