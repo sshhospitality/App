@@ -1,3 +1,4 @@
+import 'package:digi_mess/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -24,7 +25,7 @@ class _MenuPageState extends State<MenuPage> {
 
   Set<String> availableDays = {};
   Map<String, dynamic> dayMenuData = {}; // Map to store menu data for each day
-  bool isLoading = true;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -105,7 +106,7 @@ class _MenuPageState extends State<MenuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: ShimmerLoading()) // added shimmer loading instead of circular progress indicator
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
