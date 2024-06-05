@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:timelines/timelines.dart';
+import 'shimmer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -24,9 +25,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // fetchData();
-    // determineMeal();
-    // fetchPolls();
     _initialLoad = _loadData();
   }
 
@@ -127,7 +125,7 @@ class _HomePageState extends State<HomePage> {
       future: _initialLoad,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return ShimmerLoading(); // Use ShimmerLoading widget here
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else {
@@ -451,58 +449,84 @@ class _MealTimelineState extends State<MealTimeline> {
   }
 }
 
-class PieChartSection extends StatelessWidget {
+class PieChartSection extends StatefulWidget {
+  @override
+  _PieChartSectionState createState() => _PieChartSectionState();
+}
+
+class _PieChartSectionState extends State<PieChartSection> {
+  Map<String, double> dataMap = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      final String sessionCookie = await prefs.getString('token') ?? 'N/A';
+      var cookie = 'token=$sessionCookie';
+      final response = await http.post(
+        Uri.parse(
+            'https://z1ogo1n55a.execute-api.ap-south-1.amazonaws.com/api/verify/chartdetails'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'cookie': cookie,
+        },
+        body: jsonEncode(<String, String>{}),
+      );
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final maindata = responseData['mealTypeCountsByMonth'];
+        final data = maindata[0]['mealTypeCounts'];
+
+        Map<String, double> formattedData = {};
+        for (var item in data) {
+          formattedData[item['mealType']] = item['count'].toDouble();
+        }
+
+        setState(() {
+          dataMap = formattedData;
+        });
+      } else {
+        throw Exception('Failed to load chart data');
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dataMap = <String, double>{
-      "Breakfast": 5,
-      "Lunch": 3,
-      "Snacks": 2,
-      "Dinner": 4,
-    };
-
-    final colorList = <Color>[
-      Colors.blue[300]!,
-      Colors.green[300]!,
-      Colors.orange[300]!,
-      Colors.red[300]!,
-    ];
-
     return Card(
-      color: Color.fromARGB(255, 232, 225, 243),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            PieChart(
-              dataMap: dataMap,
-              animationDuration: const Duration(milliseconds: 800),
-              chartLegendSpacing: 32,
-              chartRadius: MediaQuery.of(context).size.width / 2.7,
-              colorList: colorList,
-              initialAngleInDegree: 0,
-              chartType: ChartType.ring,
-              ringStrokeWidth: 32,
-              centerText: "Meals",
-              legendOptions: const LegendOptions(
-                showLegendsInRow: false,
-                legendPosition: LegendPosition.right,
-                showLegends: true,
-                legendShape: BoxShape.circle,
-                legendTextStyle: TextStyle(
-                  fontWeight: FontWeight.bold,
+        child: dataMap.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : PieChart(
+                dataMap: dataMap,
+                chartType: ChartType.ring,
+                chartRadius: MediaQuery.of(context).size.width / 3,
+                ringStrokeWidth: 32,
+                legendOptions: LegendOptions(
+                  showLegendsInRow: false,
+                  legendPosition: LegendPosition.right,
+                  showLegends: true,
+                  legendShape: BoxShape.circle,
+                  legendTextStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                chartValuesOptions: ChartValuesOptions(
+                  showChartValueBackground: true,
+                  showChartValues: true,
+                  showChartValuesInPercentage: false,
+                  showChartValuesOutside: false,
                 ),
               ),
-              chartValuesOptions: const ChartValuesOptions(
-                showChartValueBackground: true,
-                showChartValues: true,
-                showChartValuesInPercentage: false,
-                showChartValuesOutside: false,
-                decimalPlaces: 1,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -550,7 +574,6 @@ class PollItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(poll);
     final String pollId = poll['_id'];
     final String pollQuestion = poll['question'] ?? 'No question available';
     final List<dynamic> options = poll['options'] ?? [];
@@ -602,8 +625,6 @@ class PollItem extends StatelessWidget {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? sessionCookie = prefs.getString('token');
-      print(optionText);
-      print(pollId);
       if (sessionCookie != null) {
         var cookie = 'token=$sessionCookie';
         final response = await http.post(
@@ -619,8 +640,6 @@ class PollItem extends StatelessWidget {
         );
         if (response.statusCode == 200) {
           onPollSubmitted();
-          // Handle successful response
-          print('Answer submitted successfully');
         } else {
           // Handle error
           print('Failed to submit answer');

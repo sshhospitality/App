@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'shimmer.dart'; // Import the shimmer.dart file
+import 'package:shimmer/shimmer.dart'; // Import the shimmer package
+import 'shimmer.dart';
 
 class DayMenuScreen extends StatefulWidget {
   final String day;
@@ -63,7 +64,9 @@ class _DayMenuScreenState extends State<DayMenuScreen> {
         title: Text('${widget.day}\'s Menu'),
       ),
       body: isLoading
-          ? Center(child: ShimmerLoading()) // Show shimmer loading while data is loading
+          ? Center(
+              child:
+                  ShimmerLoading()) // Show a progress indicator while data is loading
           : ListView(
               padding: const EdgeInsets.all(16.0),
               children: widget.menuData['meals'].map<Widget>((meal) {
@@ -97,32 +100,70 @@ class _DayMenuScreenState extends State<DayMenuScreen> {
                                   aspectRatio: 1,
                                   child: Card(
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16)),
+                                        borderRadius:
+                                            BorderRadius.circular(16)),
                                     elevation: 5,
                                     child: Stack(
                                       children: [
+                                        FutureBuilder(
+                                          future: precacheImage(
+                                            AssetImage(getImage(
+                                                mealType, item['category'])),
+                                            context,
+                                          ),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.done) {
+                                              return ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                        top: Radius.circular(
+                                                            16)),
+                                                child: Image.asset(
+                                                  getImage(mealType,
+                                                      item['category']),
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              );
+                                            } else {
+                                              return Shimmer.fromColors(
+                                                baseColor: Colors.grey[300]!,
+                                                highlightColor:
+                                                    Colors.grey[100]!,
+                                                child: Container(
+                                                  color: Colors.white,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Expanded(
                                               child: ClipRRect(
-                                                borderRadius: BorderRadius.vertical(
-                                                    top: Radius.circular(16)),
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                        top: Radius.circular(
+                                                            16)),
                                                 child: Image.asset(
-                                                  getImage(
-                                                      mealType, item['category']),
+                                                  getImage(mealType,
+                                                      item['category']),
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets.all(8.0),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
                                               child: Text(
                                                 item['name'],
                                                 style: TextStyle(
-                                                    fontSize: 14, color: Colors.grey),
+                                                    fontSize: 14,
+                                                    color: Colors.grey),
                                               ),
                                             ),
                                           ],
@@ -159,7 +200,8 @@ class _DayMenuScreenState extends State<DayMenuScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20), // Add some space between sections
+                    const SizedBox(
+                        height: 20), // Add some space between sections
                   ],
                 );
               }).toList(),

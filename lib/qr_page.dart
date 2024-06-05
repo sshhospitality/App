@@ -104,8 +104,6 @@ class _QRPageState extends State<QRPage> {
         showAlertDialog(
             context, 'Incorrect QR Code', 'Please scan the correct QR code.');
       }
-
-      print("QRCode_Result: $qrCode");
     } on PlatformException {
       setState(() {
         qrResult = 'Failed to scan QR Code.';
