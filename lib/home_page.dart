@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:timelines/timelines.dart';
 import 'shimmer.dart';
+import 'notifi_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -117,6 +118,10 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error fetching polls: $e');
     }
+    () {
+      NotificationService()
+          .showNotification(title: 'Sample title', body: 'It works!');//notification function call
+    };
   }
 
   @override
