@@ -14,6 +14,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String name = 'N/A';
   String college = 'N/A';
   String email = 'N/A';
+  String diet = 'N/A';
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
       name = prefs.getString('name') ?? 'N/A';
       college = prefs.getString('college') ?? 'N/A';
       email = prefs.getString('email') ?? 'N/A';
+      diet = prefs.getString('diet') ?? 'N/A';
     });
   }
 
@@ -59,6 +61,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 college,
                 style: TextStyle(fontSize: 18),
               ),
+              const SizedBox(height: 8),
+              Text(
+                diet, // Display the diet preference
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
                   try {
